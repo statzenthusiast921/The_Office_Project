@@ -1,6 +1,6 @@
-#from dash_html_components.Col import Col
-from dash_table.DataTable import DataTable
-from nltk import data
+# from dash_table.DataTable import DataTable
+# from nltk import data
+from dash_html_components.P import P
 from numpy.core.numeric import full
 import pandas as pd
 import numpy as np
@@ -19,9 +19,9 @@ import plotly.express as px
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
-#from collections import Counter
 import re
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.feature_extraction.text import CountVectorizer
 
 import contractions
 import dash_table as dt
@@ -37,16 +37,16 @@ from PIL import Image
 
 #Load data
 #/Users/jonathan.zimmerman/Desktop/Office NLP/the-office-lines.xlsx
-office_data = pd.read_excel("/Users/jonathan.zimmerman/Desktop/Office NLP/the-office-lines.xlsx")
-imdb_data = pd.read_csv('/Users/jonathan.zimmerman/Desktop/Office NLP/office_episodes.csv')
-wiki_desc = pd.read_csv('/Users/jonathan.zimmerman/Desktop/Office NLP/wiki_desc.csv')
+office_data = pd.read_excel("/Users/jonzimmerman/Desktop/Data Projects/The Office NLP/the-office-lines.xlsx")
+imdb_data = pd.read_csv('/Users/jonzimmerman/Desktop/Data Projects/The Office NLP/office_episodes.csv')
+wiki_desc = pd.read_csv('/Users/jonzimmerman/Desktop/Data Projects/The Office NLP/wiki_desc.csv')
 
 #Import Twitter data
 import pandas as pd
-s6_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/Personal-Projects/main/The%20Office%20NLP/season6_tweets.csv')
-s7_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/Personal-Projects/main/The%20Office%20NLP/season7_tweets.csv')
-s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/Personal-Projects/main/The%20Office%20NLP/season8_tweets.csv',lineterminator='\n')
-s9_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/Personal-Projects/main/The%20Office%20NLP/season9_tweets.csv')
+s6_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/season6_tweets.csv')
+s7_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/season7_tweets.csv')
+s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/season8_tweets.csv',lineterminator='\n')
+s9_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/season9_tweets.csv')
 
 
 s6_tweets['episode'] = s6_tweets['episode ']
@@ -302,41 +302,8 @@ size2 = office_data.groupby(['season','episode','scene']).size().reset_index()
 sums2 = office_data.groupby(['season','episode','scene']).agg({'just_the_2':'sum'}).reset_index()
 
 
-# main_metrics2 = pd.merge(size2,sums2,how='left',on=['season','episode','scene'])
-# main_metrics2.rename(columns={0:'count'}, inplace=True )
-
-# office_data = pd.merge(office_data,main_metrics,how='left',on=['season','episode','scene'])
-# office_data['diff'] = office_data['count'] - office_data['main_ind_y']
-
-
-
-
-# just2 = just2[just2['diff']==0]
-# just2.head()
-#2.) you have the score
-#3.) filter down to scenes with only the 2 selected
-#4.) average for character
-#5.) need something to identify other character was in scene with first character
-#6.) go back to dfpair and see if you can stick (5) in there with the compound score
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 data_for_ng = office_data[office_data['diff']==0]
-
-
-
-
 
 
 #3.) Make source, target, weight columns (weight - # of convos)
@@ -363,14 +330,6 @@ df_pairs = (
 main_network = df_pairs['Source'].sort_values().unique()
 
 df_pairs = df_pairs[(df_pairs['Source']=="Angela")|(df_pairs['Source']=="Dwight")]
-# G = nx.from_pandas_edgelist(
-#     df_pairs,
-#     source='Source',
-#     target='Target',
-#     edge_attr='Weights'
-# )
-
-# nx.draw_networkx(G)
 
 
 node_list = list(
@@ -443,6 +402,7 @@ all_main_chars = np.sort(all_main_chars)
 
 
 the_mains_df = office_data[office_data['speaker'].isin(all_main_chars)]
+main_characters_choose = the_mains_df['speaker'].unique()
 
 #the_mains_dict = the_mains_df.to_dict(['season','episode','speaker'])
 
@@ -460,6 +420,27 @@ mains_dict = the_mains_df_cols.to_dict('index')
 character_choices = office_data['speaker'].sort_values().unique()
 season_choices = office_data['season'].sort_values().unique()
 episode_choices = office_data['episode'].sort_values().unique()
+
+
+# Defining a function to visualise n-grams
+def get_top_ngram(corpus, n=None):
+    vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+    bag_of_words = vec.transform(corpus)
+    sum_words = bag_of_words.sum(axis=0) 
+    words_freq = [(word, sum_words[0, idx]) 
+                  for word, idx in vec.vocabulary_.items()]
+    words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+    return words_freq[:10]
+
+
+# Visualising the most frequent bigrams occurring in the conversation
+from sklearn.feature_extraction.text import CountVectorizer
+# import seaborn as sns
+# top_bigrams = get_top_ngram(office_data['cleaned_text'],1)[:10]
+
+# top_words = pd.DataFrame(top_bigrams,columns=['word','count'])
+# top_words = top_words.head(10).sort_values('count',ascending=True)
+# px.bar(top_words, x='count', y='word',orientation='h')
 
 
 tabs_styles = {
@@ -486,36 +467,86 @@ app = dash.Dash(__name__,assets_folder=os.path.join(os.curdir,"assets"))
 server = app.server
 app.layout = html.Div([
     dcc.Tabs([
+        dcc.Tab(label='Welcome',value='tab-0',style=tab_style, selected_style=tab_selected_style,
+        children=[
+            dbc.Row([
+                dbc.Col([
+                    html.P('Fill in later')
+
+                ],width=12)
+            ])
+        ]
+        ),
         dcc.Tab(label='Word Frequency',value='tab-1',style=tab_style, selected_style=tab_selected_style,
         children=[
                 dbc.Row([
-                    dbc.Col(
+                    dbc.Col([
+                        html.P('Choose season:')
+                    ], width=3),
+                    dbc.Col([
+                        html.P('Choose character #1:'),
+                    ],width=3),
+                    dbc.Col([
+                        html.P('Choose character #2:'),
+                    ],width=3),
+                    dbc.Col([
+                        html.P('Choose # of words:'),
+                    ],width=3),
+                    dbc.Col([
                         dcc.Dropdown(
                             id='dropdown1',
                             options=[{'label': i, 'value': i} for i in season_choices],
                             value=season_choices[0]
-                        ), width=6
-                    ),
-                    dbc.Col(
+                        )
+                    ],width=3),
+                    dbc.Col([
                         dcc.Dropdown(
                             id='dropdown2',
-                            options=[{'label': i, 'value': i} for i in character_choices],
-                            value=character_choices[0]
-                        ),width=6
-                    )
+                            options=[{'label': i, 'value': i} for i in main_characters_choose],
+                            value=main_characters_choose[0]
+                        )
+                    ],width=3),
+                    dbc.Col([
+                        dcc.Dropdown(
+                            id='dropdown2b',
+                            options=[{'label': i, 'value': i} for i in main_characters_choose],
+                            value=main_characters_choose[1]
+                        )
+                    ],width=3),
+                    dbc.Col([
+                        dcc.Slider(
+                            id='slider',
+                            min=1,max=5,step=1,
+                            marks={
+                                0: '0',
+                                1: '1',
+                                2: '2',
+                                3: '3',
+                                4: '4',
+                                5: '5'
+                            }
+                        )
+                    ],width=3)
                 ]),
-
+  
                 dbc.Row([
                     dbc.Col(
-                        dcc.Graph(id='word_freq_graph'),
-                        width=6
+                        dcc.Graph(id='word_freq_graph1'),
+                        width=4
+                    ),
+                    dbc.Col(
+                        dcc.Graph(id='word_freq_graph2'),
+                        width=4
                     ),
                     dbc.Col([
                         dbc.Card(id="card1"),
                         dbc.Card(id="card2"),
-                        dbc.Card(id="card3")
-                    ],width=6)
-                ])
+                        dbc.Card(id="card3"),
+                        dbc.Card(id='card4')
+                    ],width=4)
+        
+                ],no_gutters=True,
+                style={'fontSize':12}),
         ]),
         dcc.Tab(label='Sentiment Analysis',value='tab-2',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -578,7 +609,7 @@ app.layout = html.Div([
             ])      
         
         ]),
-        dcc.Tab(label='Network Graph',value='tab-3',style=tab_style, selected_style=tab_selected_style,
+        dcc.Tab(label='Network of Communication',value='tab-3',style=tab_style, selected_style=tab_selected_style,
         children=[
             dbc.Row([
                 dbc.Col(
@@ -670,9 +701,13 @@ app.layout = html.Div([
 @app.callback(Output('tabs-content-inline', 'children'),
               Input('tabs-styled-with-inline', 'value'))
 def render_content(tab):
-    if tab == 'tab-1':
+    if tab == 'tab-0':
         return html.Div([
             html.H3('Tab content 1')
+        ])
+    elif tab == 'tab-1':
+        return html.Div([
+            html.H3('Tab content 2')
         ])
     elif tab == 'tab-2':
         return html.Div([
@@ -698,6 +733,15 @@ def render_content(tab):
 )
 def set_character_options(selected_season):
     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0]
+
+#Configure reactivity for dynamic dropboxes - 1st one informs the 2nd
+@app.callback(
+    Output('dropdown2b', 'options'),
+    Output('dropdown2b', 'value'),
+    Input('dropdown1', 'value')
+)
+def set_character_options2(selected_season):
+    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
 
 
 
@@ -734,113 +778,323 @@ def set_episode_options(selected_season):
 def set_episode_options(selected_season):
     return [{'label': i, 'value': i} for i in season_episode_dict[selected_season]], season_episode_dict[selected_season][0],
 
-
-
-
-
 @app.callback(
-    Output('word_freq_graph','figure'),
+    Output('word_freq_graph1','figure'),
+    Output('word_freq_graph2','figure'),
+
     Input('dropdown1','value'),
-    Input('dropdown2','value')
+    Input('dropdown2','value'),
+    Input('dropdown2b','value'),
+    #Input('slider','value')
+    #need to figure out how to get this to work - error
 )
 
-def update_word_chart(season_select,character_select):
-    new_df = office_data[(office_data['season']==season_select) & (office_data['speaker']==character_select)]
+def update_word_chart(season_select,character_select1, character_select2):
+    new_df1 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select1)]
+    new_df2 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select2)]
 
-    top_words = pd.DataFrame(
-        new_df['cleaned_text'].str.split(expand=True).stack().value_counts()
-    ,columns=['count']
-    ).reset_index()
+    char1 = new_df1['speaker'].unique()[0]
+    char2 = new_df2['speaker'].unique()[0]
 
-    top_words = top_words.head(10).sort_values('count',ascending=True)
+    ch1_df = new_df1[new_df1['speaker']==char1]
+    ch2_df = new_df2[new_df2['speaker']==char2]
 
-    bar_fig = px.bar(top_words, x='count', y='index',
-                     orientation='h',
+    top_bigrams1 = get_top_ngram(ch1_df['cleaned_text'],1)[:10]
+    top_bigrams2 = get_top_ngram(ch2_df['cleaned_text'],1)[:10]
+    
 
-                     #color='count',
-                     #color_continuous_scale="blues",
-                     labels={'index':'Word',
-                             'count':'Count'}
-                    )
-    bar_fig.update_layout(coloraxis_showscale=False)
-    return bar_fig
+    top_words1 = pd.DataFrame(top_bigrams1,columns=['word','count'])
+    top_words1 = top_words1.head(10).sort_values('count',ascending=True)
+    top_words1['speaker'] = char1
+
+    top_words2 = pd.DataFrame(top_bigrams2,columns=['word','count'])
+    top_words2 = top_words2.head(10).sort_values('count',ascending=True)
+    top_words2['speaker'] = char2
+
+    bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'Words Spoken by {char1} during {season_select}')
+    bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'Words Spoken by {char2} during {season_select}')
+
+    #bar.update_yaxes(matches=None,showticklabels=True)
+    bar_fig1.update_layout(coloraxis_showscale=False, yaxis_title=None)
+    bar_fig2.update_layout(coloraxis_showscale=False, yaxis_title=None)
+
+    return bar_fig1, bar_fig2
 
 
-#Configure reactivity for dynamic dropboxes - 1st one informs the 2nd
 @app.callback(
     Output('card1', 'children'),
     Output('card2', 'children'),
     Output('card3', 'children'),
+    Output('card4', 'children'),
     Input('dropdown1', 'value'),
-    Input('dropdown2', 'value')
+    Input('dropdown2', 'value'),
+    Input('dropdown2b', 'value')
+
 )
 
-def speech_stats(season_select,character_select):
-    new_df = office_data[(office_data['season']==season_select) & (office_data['speaker']==character_select)]
+def speech_stats(season_select,character_select1,character_select2):
+    new_df1 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select1)]
+    new_df2 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select2)]
 
+    char1 = new_df1['speaker'].unique()[0]
+    char2 = new_df2['speaker'].unique()[0]
 
     #Count total # of words
-    top_words = pd.DataFrame(
-            new_df['cleaned_text'].str.split(expand=True).stack().value_counts()
+    top_words1 = pd.DataFrame(
+            new_df1['cleaned_text'].str.split(expand=True).stack().value_counts()
         ,columns=['count']
     ).reset_index()
 
-    TOTAL_WORDS = top_words['count'].sum()
+    top_words2 = pd.DataFrame(
+            new_df2['cleaned_text'].str.split(expand=True).stack().value_counts()
+        ,columns=['count']
+    ).reset_index()
+
+    TOTAL_WORDS1 = top_words1['count'].sum()
+    TOTAL_WORDS2 = top_words2['count'].sum()
+    larger_words1 = TOTAL_WORDS1-TOTAL_WORDS2
+    larger_words2 = TOTAL_WORDS2-TOTAL_WORDS1
 
     #Count total # of lines
-    TOTAL_LINES = new_df.shape[0]
+    TOTAL_LINES1 = new_df1.shape[0]
+    TOTAL_LINES2 = new_df2.shape[0]
+    larger_lines1 = TOTAL_LINES1-TOTAL_LINES2
+    larger_lines2 = TOTAL_LINES2-TOTAL_LINES1
 
     #Count total # of scenes
-    TOTAL_SCENES = len(new_df['scene'].unique())
+    TOTAL_SCENES1 = len(new_df1['scene'].unique())
+    TOTAL_SCENES2 = len(new_df2['scene'].unique())
+    larger_scenes1 = TOTAL_SCENES1-TOTAL_SCENES2
+    larger_scenes2 = TOTAL_SCENES2-TOTAL_SCENES1
 
 
+    if TOTAL_WORDS1 > TOTAL_WORDS2:
+        card1 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} speaks {larger_words1} more words than {char2} during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    elif TOTAL_WORDS1 < TOTAL_WORDS2:
+        card1 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char2} speaks {larger_words2} more words than {char1} during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    else:
+        card1 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} and {char2} speaks the same # of words during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
 
-    card1 = dbc.Card([
+    
+
+    if TOTAL_LINES1 > TOTAL_LINES2:
+        card2 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} has {larger_lines1} more lines than {char2} during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    elif TOTAL_LINES1 < TOTAL_LINES2:
+        card2 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char2} has {larger_lines2} more lines than {char1} during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    else:
+        card2 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} and {char2} have the same # of lines.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    if TOTAL_SCENES1 > TOTAL_SCENES2:
+
+        card3 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} speaks in {larger_scenes1} more scenes than {char2}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    elif TOTAL_SCENES1 < TOTAL_SCENES2:
+        card3 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char2} speaks in {larger_scenes2} more scenes than {char1} during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    else:
+        card3 = dbc.Card([
+            dbc.CardBody([
+                html.H4(f'{char1} and {char2} speak in the same # of scenes during {season_select}.', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+
+    card4 = dbc.Card([
         dbc.CardBody([
-            html.H4(TOTAL_WORDS, className="card-title"),
-            html.P(f"Total Words Spoken")
-        ])
-    ],
-    style={#'display': 'inline-block',
-           'width': '100%',
-           'text-align': 'center',
-           'background-color': 'rgba(104,108,252)',
-           'color':'white',
-           'fontWeight': 'bold',
-           'fontSize':20},
-    outline=True)
+                html.H4(f'{char1} and {char2} share X% of words spoken', className="card-title"),
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'rgba(104,108,252)',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
 
-    card2 = dbc.Card([
-        dbc.CardBody([
-            html.H4(TOTAL_LINES, className="card-title"),
-            html.P(f"Total Lines")
-        ])
-    ],
-    style={#'display': 'inline-block',
-           'width': '100%',
-           'text-align': 'center',
-           'background-color': 'rgba(104,108,252)',
-           'color':'white',
-           'fontWeight': 'bold',
-           'fontSize':20},
-    outline=True)
 
-    card3 = dbc.Card([
-        dbc.CardBody([
-            html.H4(TOTAL_SCENES, className="card-title"),
-            html.P(f"Total Scenes")
-        ])
-    ],
-    style={#'display': 'inline-block',
-           'width': '100%',
-           'text-align': 'center',
-           'background-color': 'rgb(104,108,252)',
-           'color':'white',
-           'fontWeight': 'bold',
-           'fontSize':20},
-    outline=True)
+    return card1, card2, card3, card4
 
-    return (card1, card2, card3)  
+
+# #Configure reactivity for second set of cards
+# @app.callback(
+#     Output('card4', 'children'),
+#     Output('card5', 'children'),
+#     Output('card6', 'children'),
+#     Input('dropdown1', 'value'),
+#     Input('dropdown2b', 'value')
+# )
+
+# def speech_stats(season_select,character2_select):
+#     new_df = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character2_select)]
+
+
+#     #Count total # of words
+#     top_words = pd.DataFrame(
+#             new_df['cleaned_text'].str.split(expand=True).stack().value_counts()
+#         ,columns=['count']
+#     ).reset_index()
+
+#     TOTAL_WORDS = top_words['count'].sum()
+
+#     #Count total # of lines
+#     TOTAL_LINES = new_df.shape[0]
+
+#     #Count total # of scenes
+#     TOTAL_SCENES = len(new_df['scene'].unique())
+
+
+
+#     card4 = dbc.Card([
+#         dbc.CardBody([
+#             html.H4(TOTAL_WORDS, className="card-title"),
+#             html.P(f"Total Words")
+#         ])
+#     ],
+#     style={#'display': 'inline-block',
+#            'width': '100%',
+#            'text-align': 'center',
+#            'background-color': 'rgba(104,108,252)',
+#            'color':'white',
+#            'fontWeight': 'bold',
+#            'fontSize':20},
+#     outline=True)
+
+#     card5 = dbc.Card([
+#         dbc.CardBody([
+#             html.H4(TOTAL_LINES, className="card-title"),
+#             html.P(f"Total Lines")
+#         ])
+#     ],
+#     style={#'display': 'inline-block',
+#            'width': '100%',
+#            'text-align': 'center',
+#            'background-color': 'rgba(104,108,252)',
+#            'color':'white',
+#            'fontWeight': 'bold',
+#            'fontSize':20},
+#     outline=True)
+
+#     card6 = dbc.Card([
+#         dbc.CardBody([
+#             html.H4(TOTAL_SCENES, className="card-title"),
+#             html.P(f"Total Scenes")
+#         ])
+#     ],
+#     style={#'display': 'inline-block',
+#            'width': '100%',
+#            'text-align': 'center',
+#            'background-color': 'rgb(104,108,252)',
+#            'color':'white',
+#            'fontWeight': 'bold',
+#            'fontSize':20},
+#     outline=True)
+
+#     return card4, card5, card6
+
 
 
 @app.callback(
