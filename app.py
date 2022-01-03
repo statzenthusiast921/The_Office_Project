@@ -433,16 +433,6 @@ def get_top_ngram(corpus, n=None):
     return words_freq[:10]
 
 
-# Visualising the most frequent bigrams occurring in the conversation
-from sklearn.feature_extraction.text import CountVectorizer
-# import seaborn as sns
-# top_bigrams = get_top_ngram(office_data['cleaned_text'],1)[:10]
-
-# top_words = pd.DataFrame(top_bigrams,columns=['word','count'])
-# top_words = top_words.head(10).sort_values('count',ascending=True)
-# px.bar(top_words, x='count', y='word',orientation='h')
-
-
 tabs_styles = {
     'height': '44px'
 }
@@ -481,42 +471,33 @@ app.layout = html.Div([
         children=[
                 dbc.Row([
                     dbc.Col([
-                        html.P('Choose season:')
-                    ], width=3),
-                    dbc.Col([
-                        html.P('Choose character #1:'),
-                    ],width=3),
-                    dbc.Col([
-                        html.P('Choose character #2:'),
-                    ],width=3),
-                    dbc.Col([
-                        html.P('Choose # of words:'),
-                    ],width=3),
-                    dbc.Col([
-                        dcc.Dropdown(
-                            id='dropdown1',
-                            options=[{'label': i, 'value': i} for i in season_choices],
-                            value=season_choices[0]
-                        )
-                    ],width=3),
-                    dbc.Col([
+                        html.H2('Parameter Menu'),
+                        html.P(),
+                        html.Label(dcc.Markdown('''**Choose character #1:**''')),
                         dcc.Dropdown(
                             id='dropdown2',
                             options=[{'label': i, 'value': i} for i in main_characters_choose],
                             value=main_characters_choose[0]
-                        )
-                    ],width=3),
-                    dbc.Col([
+                        ),
+                        html.P(),
+                        html.Label(dcc.Markdown('''**Choose character #2:**''')),
                         dcc.Dropdown(
                             id='dropdown2b',
                             options=[{'label': i, 'value': i} for i in main_characters_choose],
                             value=main_characters_choose[1]
-                        )
-                    ],width=3),
-                    dbc.Col([
+                        ),
+                        html.P(),
+                        html.Label(dcc.Markdown('''**Choose season:**''')),
+                        dcc.Dropdown(
+                            id='dropdown1',
+                            options=[{'label': i, 'value': i} for i in season_choices],
+                            value=season_choices[0]
+                        ),
+                        html.P(),
+                        html.Label(dcc.Markdown('''**Choose # of words:**''')),
                         dcc.Slider(
-                            id='slider',
-                            min=1,max=5,step=1,
+                            id='num_words_slider',
+                            min=1,max=5,step=1,value=1,
                             marks={
                                 0: '0',
                                 1: '1',
@@ -526,10 +507,10 @@ app.layout = html.Div([
                                 5: '5'
                             }
                         )
-                    ],width=3)
-                ]),
-  
-                dbc.Row([
+                    ],width=3),
+                    dbc.Col([
+                        #html.P('Just to take up space')
+                    ],width=1),
                     dbc.Col(
                         dcc.Graph(id='word_freq_graph1'),
                         width=4
@@ -537,16 +518,22 @@ app.layout = html.Div([
                     dbc.Col(
                         dcc.Graph(id='word_freq_graph2'),
                         width=4
-                    ),
+                    )
+                ],no_gutters=True),
+                dbc.Row([
                     dbc.Col([
-                        dbc.Card(id="card1"),
-                        dbc.Card(id="card2"),
-                        dbc.Card(id="card3"),
+                        dbc.Card(id="card1")
+                    ],width=3),
+                    dbc.Col([
+                        dbc.Card(id="card2")
+                    ],width=3),
+                    dbc.Col([
+                        dbc.Card(id="card3")
+                    ],width=3),
+                    dbc.Col([
                         dbc.Card(id='card4')
-                    ],width=4)
-        
-                ],no_gutters=True,
-                style={'fontSize':12}),
+                    ],width=3)
+                ],no_gutters=True)
         ]),
         dcc.Tab(label='Sentiment Analysis',value='tab-2',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -785,11 +772,11 @@ def set_episode_options(selected_season):
     Input('dropdown1','value'),
     Input('dropdown2','value'),
     Input('dropdown2b','value'),
-    #Input('slider','value')
+    Input('num_words_slider','value')
     #need to figure out how to get this to work - error
 )
 
-def update_word_chart(season_select,character_select1, character_select2):
+def update_word_chart(season_select,character_select1, character_select2,slider_select):
     new_df1 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select1)]
     new_df2 = the_mains_df[(the_mains_df['season']==season_select) & (the_mains_df['speaker']==character_select2)]
 
@@ -799,8 +786,10 @@ def update_word_chart(season_select,character_select1, character_select2):
     ch1_df = new_df1[new_df1['speaker']==char1]
     ch2_df = new_df2[new_df2['speaker']==char2]
 
-    top_bigrams1 = get_top_ngram(ch1_df['cleaned_text'],1)[:10]
-    top_bigrams2 = get_top_ngram(ch2_df['cleaned_text'],1)[:10]
+    word_num = slider_select
+
+    top_bigrams1 = get_top_ngram(ch1_df['cleaned_text'],word_num)[:10]
+    top_bigrams2 = get_top_ngram(ch2_df['cleaned_text'],word_num)[:10]
     
 
     top_words1 = pd.DataFrame(top_bigrams1,columns=['word','count'])
@@ -811,12 +800,46 @@ def update_word_chart(season_select,character_select1, character_select2):
     top_words2 = top_words2.head(10).sort_values('count',ascending=True)
     top_words2['speaker'] = char2
 
-    bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'Words Spoken by {char1} during {season_select}')
-    bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'Words Spoken by {char2} during {season_select}')
+    #Set up if then to see which of the 2 is larger
+    xlimit1 = top_words1['count'].max()
+    xlimit2 = top_words2['count'].max()
 
-    #bar.update_yaxes(matches=None,showticklabels=True)
-    bar_fig1.update_layout(coloraxis_showscale=False, yaxis_title=None)
-    bar_fig2.update_layout(coloraxis_showscale=False, yaxis_title=None)
+    if xlimit1 > xlimit2:
+        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1}')
+        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2}')
+
+        bar_fig1.update_layout(
+            coloraxis_showscale=False, 
+            yaxis_title=None,
+            xaxis_range=[0,xlimit1+1],
+            margin=dict(l=20, r=20, t=45, b=20)
+        )
+
+        bar_fig2.update_layout(
+            coloraxis_showscale=False, 
+            yaxis_title=None,
+            xaxis_range=[0,xlimit1+1],
+            margin=dict(l=20, r=20, t=45, b=20)
+        )
+
+
+    else:
+        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1}')
+        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2}')
+
+        bar_fig1.update_layout(
+            coloraxis_showscale=False, 
+            yaxis_title=None,
+            xaxis_range=[0,xlimit2+1],
+            margin=dict(l=20, r=20, t=45, b=20)
+        )
+
+        bar_fig2.update_layout(
+            coloraxis_showscale=False, 
+            yaxis_title=None,
+            xaxis_range=[0,xlimit2+1],
+            margin=dict(l=20, r=20, t=45, b=20)
+        )
 
     return bar_fig1, bar_fig2
 
@@ -871,7 +894,8 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_WORDS1 > TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} speaks {larger_words1} more words than {char2} during {season_select}.', className="card-title"),
+                html.H2(f'{larger_words1} more words'),
+                html.P(f'spoken by {char1} than {char2} \n during {season_select}')
             ])
         ],
         style={
@@ -885,7 +909,9 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_WORDS1 < TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2} speaks {larger_words2} more words than {char1} during {season_select}.', className="card-title"),
+                html.H2(f'{larger_words2} more words'),
+                html.P(f'spoken by {char2} than {char1} \n during {season_select}')
+
             ])
         ],
         style={
@@ -899,7 +925,9 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} and {char2} speaks the same # of words during {season_select}.', className="card-title"),
+                html.H2('No difference'),
+                html.P(f'# of words spoken \n during {season_select}')
+
             ])
         ],
         style={
@@ -916,8 +944,11 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_LINES1 > TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} has {larger_lines1} more lines than {char2} during {season_select}.', className="card-title"),
+                html.H2(f'{larger_lines1} more lines'),
+                html.P(f'spoken by {char1} than {char2} \n during {season_select}')
+
             ])
+
         ],
         style={
             'width': '100%',
@@ -930,8 +961,12 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_LINES1 < TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2} has {larger_lines2} more lines than {char1} during {season_select}.', className="card-title"),
+                html.H2(f'{larger_lines2} more lines'),
+                html.P(f'spoken by {char2} than {char1} \n during {season_select}')
+
+
             ])
+       
         ],
         style={
             'width': '100%',
@@ -944,7 +979,9 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} and {char2} have the same # of lines.', className="card-title"),
+                html.H2('No difference'),
+                html.P('# of lines spoken \n during {season_select}')
+
             ])
         ],
         style={
@@ -960,7 +997,9 @@ def speech_stats(season_select,character_select1,character_select2):
 
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} speaks in {larger_scenes1} more scenes than {char2}.', className="card-title"),
+                html.H2(f'{larger_scenes1} more scenes'),
+                html.P(f'with {char1} than {char2} \n during {season_select}')
+
             ])
         ],
         style={
@@ -974,7 +1013,10 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_SCENES1 < TOTAL_SCENES2:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2} speaks in {larger_scenes2} more scenes than {char1} during {season_select}.', className="card-title"),
+                html.H2(f'{larger_scenes2} more scenes'),
+                html.P(f'with {char2} than {char1} \n during {season_select}')
+
+
             ])
         ],
         style={
@@ -988,7 +1030,9 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1} and {char2} speak in the same # of scenes during {season_select}.', className="card-title"),
+                html.H2('No difference'),
+                html.P(f'# of scenes \n during {season_select}')
+
             ])
         ],
         style={
@@ -1003,7 +1047,9 @@ def speech_stats(season_select,character_select1,character_select2):
 
     card4 = dbc.Card([
         dbc.CardBody([
-                html.H4(f'{char1} and {char2} share X% of words spoken', className="card-title"),
+                html.H2('X% words shared'),
+                html.P(f'between {char1} and {char2} \n during {season_select}')
+
             ])
         ],
         style={
