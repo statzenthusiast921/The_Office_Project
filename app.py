@@ -1,8 +1,6 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/06/22
-# from dash_table.DataTable import DataTable
-# from nltk import data
-from dash_html_components.P import P
+#Date Last Modified: 01/07/22
+#-----------------------------------------------#
 from numpy.core.numeric import full
 import pandas as pd
 import numpy as np
@@ -11,8 +9,9 @@ import os
 import matplotlib.pyplot as plt
 #%matplotlib inline
 plt.style.use('ggplot')
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
+#from dash import dbc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.express as px
@@ -24,7 +23,7 @@ from nltk.tokenize import RegexpTokenizer
 from collections import Counter
 import re
 import contractions
-import dash_table as dt
+from dash import dash_table as dt
 #!pip install visdcc
 import visdcc
 import networkx as nx
@@ -410,7 +409,7 @@ tab_style = {
 tab_selected_style = {
     'borderTop': '1px solid #d6d6d6',
     'borderBottom': '1px solid #d6d6d6',
-    'backgroundColor': '#119DFF',
+    'backgroundColor': 'grey',
     'color': 'white',
     'padding': '6px'
 }
@@ -423,34 +422,32 @@ server = app.server
 app.layout = html.Div([
     dcc.Tabs([
         dcc.Tab(label='Welcome',value='tab-0',style=tab_style, selected_style=tab_selected_style,
-        children=[
-                     html.Div([
-                       html.H1(dcc.Markdown('''**Welcome to my Text Analysis of The Office Dashboard**''')),
-                       html.Br()
-                   ]),
-                   
-                   html.Div([
-                        html.P(dcc.Markdown('''**What is the purpose of this dashboard?**''')),
-                   ],style={'text-decoration': 'underline'}),
-                   html.Div([
-                       html.P("This dashboard describes..."),
-                       html.Br()
-                   ]),
-                   html.Div([
-                       html.P(dcc.Markdown('''**What data is being used for this analysis?**''')),
-                   ],style={'text-decoration': 'underline'}),
-                   
-                   html.Div([
-                       html.P(["blah"]),
-                       html.Br()
-                   ]),
-                   html.Div([
-                       html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
-                   ],style={'text-decoration': 'underline'}),
-                   html.Div([
-                       html.P("blah.")
-                   ])
-        ]
+            children=[
+                html.Div([
+                    html.H1(dcc.Markdown('''**Welcome to my Text Analysis of The Office Dashboard**''')),
+                    html.Br()
+                ]), 
+                html.Div([
+                    html.P(dcc.Markdown('''**What is the purpose of this dashboard?**''')),
+                ],style={'text-decoration': 'underline'}),
+                html.Div([
+                    html.P("This dashboard describes..."),
+                    html.Br()
+                ]),
+                html.Div([
+                    html.P(dcc.Markdown('''**What data is being used for this analysis?**''')),
+                ],style={'text-decoration': 'underline'}),
+                html.Div([
+                    html.P(["blah"]),
+                    html.Br()
+                ]),
+                html.Div([
+                    html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
+                ],style={'text-decoration': 'underline'}),
+                html.Div([
+                    html.P("blah.")
+                ])
+            ]
         ),
         dcc.Tab(label='Comparing Dialogues',value='tab-1',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -527,13 +524,13 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     html.Label(dcc.Markdown('''**Choose character #1:**'''))
-                ],width=3),
+                ],width=4),
                 dbc.Col([
                     html.Label(dcc.Markdown('''**Choose character #2:**''')),
-                ],width=3),
+                ],width=4),
                 dbc.Col([
-                #Take up space for now
-                ],width=6)
+                    html.Label(dcc.Markdown('''**Choose min/max line:**''')),
+                ],width=4)
             ]),
             dbc.Row([
                 dbc.Col([
@@ -542,111 +539,111 @@ app.layout = html.Div([
                             options=[{'label': i, 'value': i} for i in all_main_chars_list],
                             value=all_main_chars_list[0]
                     )
-                ],width=3),
+                ],width=4),
                 dbc.Col([
                     dcc.Dropdown(
                             id='dropdown3c',
                             options=[{'label': i, 'value': i} for i in all_main_chars_list],
                             value=all_main_chars_list[1]
                     )
-                ],width=3),
+                ],width=4),
                 dbc.Col([
-                #Take up space for now
-                ],width=6)
+                     dbc.RadioItems(
+                        id='radio1',
+                        options=[
+                            {'label': 'Show Min/Max Lines', 'value': 'Show Min/Max Lines'},
+                            {'label': 'Hide Min/Max Lines', 'value': 'Hide Min/Max Lines'}
+                        ],
+                        value='Show Min/Max Lines',
+                        labelStyle={'display': 'inline-block','text-align': 'left'}
+                    )
+                ],width=4)
             ]),   
             dbc.Row([     
                 dbc.Col([
                     dcc.Graph(id='sentiment_line_graph'),
-                ],width=6),
-                dbc.Col([
-                    dbc.Button(block=True,id='open2',style={
-                        'background-color':'#686cfc'
-                    }),
-                    dbc.Button(block=True,id='open1',style={
-                        'background-color':'#686cfc'
-                    }),
-                    dbc.Button(block=True,id='open4',style={
-                        'background-color':'#f0543c'
-                    }),
-                    dbc.Button(block=True,id='open3',style={
-                        'background-color':'#f0543c'
-                    })
+                ],width=12),
+            #     dbc.Col([
+            #         dbc.Button(block=True,id='open2',style={'background-color':'#686cfc'}),
+            #         dbc.Button(block=True,id='open1',style={'background-color':'#686cfc'}),
+            #         dbc.Button(block=True,id='open4',style={'background-color':'#f0543c'}),
+            #         dbc.Button(block=True,id='open3',style={'background-color':'#f0543c'})
 
-                ],width=6)
-            ]),
+            #     ],width=6)
+            # ]),
             #BUTTON #1 --> Character 1, Minimum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id="table2",
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close1", className="ml-auto")
-                        ),
-                    ],id="modal1"
-                )
-            ]),
-            #BUTTON #2 --> Character 1, Maximum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id='table1',
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close2", className="ml-auto")
-                        ),
-                    ],id="modal2")
-            ]),
-            #BUTTON #3 --> Character 2, Minimum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id="table4",
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close3", className="ml-auto")
-                        ),
-                    ],id="modal3"
-                )
-            ]),
-            #BUTTON #4 --> Character 2, Maximum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id='table3',
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close4", className="ml-auto")
-                        ),
-                    ],id="modal4")
+            # html.Div([
+            #     dbc.Modal(
+            #         children=[
+            #             dbc.ModalHeader("Episode Description"),
+            #             dbc.ModalBody(
+            #                 children=[
+            #                     html.P(
+            #                         id="table2",
+            #                         style={'overflow':'auto','maxHeight':'400px'}
+            #                     )
+            #                 ]
+            #             ),
+            #             dbc.ModalFooter(
+            #                 dbc.Button("Close", id="close1", className="ml-auto")
+            #             ),
+            #         ],id="modal1"
+            #     )
+            # ]),
+            # #BUTTON #2 --> Character 1, Maximum Sentiment
+            # html.Div([
+            #     dbc.Modal(
+            #         children=[
+            #             dbc.ModalHeader("Episode Description"),
+            #             dbc.ModalBody(
+            #                 children=[
+            #                     html.P(
+            #                         id='table1',
+            #                         style={'overflow':'auto','maxHeight':'400px'}
+            #                     )
+            #                 ]
+            #             ),
+            #             dbc.ModalFooter(
+            #                 dbc.Button("Close", id="close2", className="ml-auto")
+            #             ),
+            #         ],id="modal2")
+            # ]),
+            # #BUTTON #3 --> Character 2, Minimum Sentiment
+            # html.Div([
+            #     dbc.Modal(
+            #         children=[
+            #             dbc.ModalHeader("Episode Description"),
+            #             dbc.ModalBody(
+            #                 children=[
+            #                     html.P(
+            #                         id="table4",
+            #                         style={'overflow':'auto','maxHeight':'400px'}
+            #                     )
+            #                 ]
+            #             ),
+            #             dbc.ModalFooter(
+            #                 dbc.Button("Close", id="close3", className="ml-auto")
+            #             ),
+            #         ],id="modal3"
+            #     )
+            # ]),
+            # #BUTTON #4 --> Character 2, Maximum Sentiment
+            # html.Div([
+            #     dbc.Modal(
+            #         children=[
+            #             dbc.ModalHeader("Episode Description"),
+            #             dbc.ModalBody(
+            #                 children=[
+            #                     html.P(
+            #                         id='table3',
+            #                         style={'overflow':'auto','maxHeight':'400px'}
+            #                     )
+            #                 ]
+            #             ),
+            #             dbc.ModalFooter(
+            #                 dbc.Button("Close", id="close4", className="ml-auto")
+            #             ),
+            #         ],id="modal4")
             ])                       
         
         ]),
@@ -964,6 +961,7 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
     top_words2 = top_words2.head(10).sort_values('count',ascending=True)
     top_words2['speaker'] = char2
 
+
     #Set up if then to see which of the 2 is larger
     xlimit1 = top_words1['count'].max()
     xlimit2 = top_words2['count'].max()
@@ -992,7 +990,8 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
                    'x':0.5
             }
         )
-
+        bar_fig1.update_traces(marker_color='#2E91E5')
+        bar_fig2.update_traces(marker_color='#D7504D')
 
     else:
         bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1} Words',labels={'count':'Frequency'})
@@ -1019,6 +1018,9 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
                 'x':0.5
             }
         )
+        bar_fig1.update_traces(marker_color='#2E91E5')
+        bar_fig2.update_traces(marker_color='#D7504D')
+
 
     return bar_fig1, bar_fig2
 
@@ -1098,14 +1100,14 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_WORDS1 > TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_words1} more words'),
-                html.P(f'spoken by {char1} than {char2} \n during {season_select}')
+                html.H4(f'{char1}: {larger_words1} more words'),
+                html.P(f'than {char2} during {season_select}')
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#2E91E5',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1113,15 +1115,14 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_WORDS1 < TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_words2} more words'),
-                html.P(f'spoken by {char2} than {char1} \n during {season_select}')
-
+                html.H4(f'{char2}: {larger_words2} more words'),
+                html.P(f'than {char1} during {season_select}')
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#D7504D',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1129,15 +1130,15 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4('No difference'),
-                html.P(f'# of words spoken \n during {season_select}')
+                html.H4('Same # of words spoken'),
+                html.P(f'during {season_select}')
 
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': 'grey',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1148,8 +1149,8 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_LINES1 > TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_lines1} more lines'),
-                html.P(f'spoken by {char1} than {char2} \n during {season_select}')
+                html.H4(f'{char1}: {larger_lines1} more lines'),
+                html.P(f'than {char2} during {season_select}')
 
             ])
 
@@ -1157,7 +1158,7 @@ def speech_stats(season_select,character_select1,character_select2):
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#2E91E5',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1165,17 +1166,15 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_LINES1 < TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_lines2} more lines'),
-                html.P(f'spoken by {char2} than {char1} \n during {season_select}')
-
-
+                html.H4(f'{char2}: {larger_lines2} more lines'),
+                html.P(f'than {char1} during {season_select}')
             ])
        
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#D7504D',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1183,15 +1182,15 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4('No difference'),
-                html.P(f'# of lines spoken \n during {season_select}')
+                html.H4('Same # of lines spoken'),
+                html.P(f'during {season_select}')
 
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': 'grey',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1201,15 +1200,15 @@ def speech_stats(season_select,character_select1,character_select2):
 
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_scenes1} more scenes'),
-                html.P(f'with {char1} than {char2} \n during {season_select}')
+                html.H4(f'{char1}: {larger_scenes1} more scenes'),
+                html.P(f'than {char2} during {season_select}')
 
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#2E91E5',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1217,16 +1216,14 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_SCENES1 < TOTAL_SCENES2:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{larger_scenes2} more scenes'),
-                html.P(f'with {char2} than {char1} \n during {season_select}')
-
-
+                html.H4(f'{char2}: {larger_scenes2} more scenes'),
+                html.P(f'than {char1} during {season_select}')
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': '#D7504D',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1234,15 +1231,14 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4('No difference'),
-                html.P(f'# of scenes \n during {season_select}')
-
+                html.H4('Same # of scenes'),
+                html.P(f'during {season_select}')
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': 'grey',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1252,14 +1248,14 @@ def speech_stats(season_select,character_select1,character_select2):
     card4 = dbc.Card([
         dbc.CardBody([
                 html.H4(f'{words_shared_perc}% words shared'),
-                html.P(f'between {char1} and {char2} \n during {season_select}')
+                html.P(f'between {char1} and {char2} during {season_select}')
 
             ])
         ],
         style={
             'width': '100%',
             'text-align': 'center',
-            'background-color': 'rgba(104,108,252)',
+            'background-color': 'grey',
             'color':'white',
             'fontWeight': 'bold',
             'fontSize':12},
@@ -1271,20 +1267,21 @@ def speech_stats(season_select,character_select1,character_select2):
 
 @app.callback(
     Output('sentiment_line_graph','figure'),
-    Output('table1','children'),
-    Output('table2','children'),
-    Output('table3','children'),
-    Output('table4','children'),
-    Output('open1','children'),
-    Output('open2','children'),
-    Output('open3','children'),
-    Output('open4','children'),
+    # Output('table1','children'),
+    # Output('table2','children'),
+    # Output('table3','children'),
+    # Output('table4','children'),
+    # Output('open1','children'),
+    # Output('open2','children'),
+    # Output('open3','children'),
+    # Output('open4','children'),
     Input('dropdown3b','value'),
-    Input('dropdown3c','value')
+    Input('dropdown3c','value'),
+    Input('radio1','value')
 
 )
 
-def sentiment(character_select1, character_select2):
+def sentiment(character_select1, character_select2,radio_select):
     new_df1 = the_mains_df[the_mains_df['speaker']==character_select1]
     new_df2 = the_mains_df[the_mains_df['speaker']==character_select2]
 
@@ -1312,17 +1309,37 @@ def sentiment(character_select1, character_select2):
     #sentiment_df.to_csv('/Users/jonzimmerman/Desktop/sentiment_test.csv', index=False)
     sentiment_df = sentiment_df.sort_values(["season_num", "episode_num"], ascending = (True, True))
 
+    char1_min = sentiment_df[f'{character_select1} Sentiment'].min()
+    char1_max = sentiment_df[f'{character_select1} Sentiment'].max()
+    char1_se_ep_min = sentiment_df[sentiment_df[f'{character_select1} Sentiment']==char1_min]['label'].values[0]
+    char1_se_ep_max = sentiment_df[sentiment_df[f'{character_select1} Sentiment']==char1_max]['label'].values[0]
+
+    char2_min = sentiment_df[f'{character_select2} Sentiment'].min()
+    char2_max = sentiment_df[f'{character_select2} Sentiment'].max()
+    char2_se_ep_min = sentiment_df[sentiment_df[f'{character_select2} Sentiment']==char2_min]['label'].values[0]
+    char2_se_ep_max = sentiment_df[sentiment_df[f'{character_select2} Sentiment']==char2_max]['label'].values[0]
+
 
 
     fig = px.line(
-        sentiment_df, x="label", y=[f"{character_select1} Sentiment",f"{character_select2} Sentiment"], title='Average Sentiment',
+        sentiment_df, x="label", y=[f"{character_select1} Sentiment",f"{character_select2} Sentiment"], title='Average Sentiment Over Time',
         labels={
             "label": "Episodes"
         }
     )
     fig.update_xaxes(showticklabels=False)
     fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="black")
-    fig.update_yaxes(range = [-1,1])
+
+    if "Show Min/Max Lines" in radio_select:
+        fig.add_vline(x=char1_se_ep_max,line_width=3, line_dash="dash", line_color="#2E91E5")
+        fig.add_vline(x=char1_se_ep_min,line_width=3, line_dash="dash", line_color="#2E91E5")
+        fig.add_vline(x=char2_se_ep_max,line_width=3, line_dash="dash", line_color="#D7504D")
+        fig.add_vline(x=char2_se_ep_min,line_width=3, line_dash="dash", line_color="#D7504D")
+
+
+    fig.update_yaxes(
+        range = [-1,1],
+        title='Sentiment')
 
     fig.update_layout(
         title={
@@ -1340,119 +1357,105 @@ def sentiment(character_select1, character_select2):
             x=1
         )
     )
+    #fig.update_traces(line_color='#2E91E5')
+    #fig.update_traces(marker_color='#D7504D')
 
 
-    char1_min = sentiment_df[f'{character_select1} Sentiment'].min()
-    char1_max = sentiment_df[f'{character_select1} Sentiment'].max()
-    char1_se_ep_min = sentiment_df[sentiment_df[f'{character_select1} Sentiment']==char1_min]['label'].values[0]
-    char1_se_ep_max = sentiment_df[sentiment_df[f'{character_select1} Sentiment']==char1_max]['label'].values[0]
+    # s_df1=new_df1.groupby(['season','episode']).agg({
+    #     'compound':'mean',
+    #     'desc':'first',
+    #     'title':'first'
+    #     }).reset_index()
+    # s_df1['label'] = s_df1['season']+', '+s_df1['episode']
 
-    char2_min = sentiment_df[f'{character_select2} Sentiment'].min()
-    char2_max = sentiment_df[f'{character_select2} Sentiment'].max()
-    char2_se_ep_min = sentiment_df[sentiment_df[f'{character_select2} Sentiment']==char2_min]['label'].values[0]
-    char2_se_ep_max = sentiment_df[sentiment_df[f'{character_select2} Sentiment']==char2_max]['label'].values[0]
-
-    char1_min = round(char1_min,3)
-    char1_max = round(char1_max,3)
-    char2_min = round(char2_min,3)
-    char2_max = round(char2_max,3)
+    # most_pos1 = s_df1[s_df1['compound']==s_df1['compound'].max()]
+    # most_neg1 = s_df1[s_df1['compound']==s_df1['compound'].min()]
 
 
-    s_df1=new_df1.groupby(['season','episode']).agg({
-        'compound':'mean',
-        'desc':'first',
-        'title':'first'
-        }).reset_index()
-    s_df1['label'] = s_df1['season']+', '+s_df1['episode']
+    # most_pos1 = most_pos1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
+    # most_neg1 = most_neg1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
 
-    most_pos1 = s_df1[s_df1['compound']==s_df1['compound'].max()]
-    most_neg1 = s_df1[s_df1['compound']==s_df1['compound'].min()]
+    # most_pos1 = most_pos1[['Episode','Title','Description']]#.style.hide_index()
+    # most_neg1 = most_neg1[['Episode','Title','Description']]#.style.hide_index()
 
-
-    most_pos1 = most_pos1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
-    most_neg1 = most_neg1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
-
-    most_pos1 = most_pos1[['Episode','Title','Description']]#.style.hide_index()
-    most_neg1 = most_neg1[['Episode','Title','Description']]#.style.hide_index()
-
-    pos_dt1 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_pos1.columns],
-        data=most_pos1.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
-    neg_dt1 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_neg1.columns],
-        data=most_neg1.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
+    # pos_dt1 = dt.DataTable(
+    #     columns=[{"name": i, "id": i} for i in most_pos1.columns],
+    #     data=most_pos1.to_dict('records'),
+    #     style_data={
+    #         'whiteSpace': 'normal',
+    #         'height': '150px',
+    #     },
+    #     style_cell={'textAlign': 'left'}
+    # )
+    # neg_dt1 = dt.DataTable(
+    #     columns=[{"name": i, "id": i} for i in most_neg1.columns],
+    #     data=most_neg1.to_dict('records'),
+    #     style_data={
+    #         'whiteSpace': 'normal',
+    #         'height': '150px',
+    #     },
+    #     style_cell={'textAlign': 'left'}
+    # )
 
 
-    s_df2=new_df2.groupby(['season','episode']).agg({
-        'compound':'mean',
-        'desc':'first',
-        'title':'first'
-        }).reset_index()
-    s_df2['label'] = s_df2['season']+', '+s_df2['episode']
+    # s_df2=new_df2.groupby(['season','episode']).agg({
+    #     'compound':'mean',
+    #     'desc':'first',
+    #     'title':'first'
+    #     }).reset_index()
+    # s_df2['label'] = s_df2['season']+', '+s_df2['episode']
 
-    most_pos2 = s_df2[s_df2['compound']==s_df2['compound'].max()]
-    most_neg2 = s_df2[s_df2['compound']==s_df2['compound'].min()]
-
-
-    most_pos2 = most_pos2.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
-    most_neg2 = most_neg2.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
-
-    most_pos2 = most_pos2[['Episode','Title','Description']]#.style.hide_index()
-    most_neg2 = most_neg2[['Episode','Title','Description']]#.style.hide_index()
-
-    pos_dt2 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_pos2.columns],
-        data=most_pos2.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
-    neg_dt2 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_neg2.columns],
-        data=most_neg2.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
-
-    button1 = dbc.Button([
-        html.H4(f"{char1_min}"),
-        html.P(f'Min Sentiment for {character_select1}: {char1_se_ep_min}')
-    ])
-
-    button2 = dbc.Button([
-        html.H4(f"{char1_max}"),
-        html.P(f'Max Sentiment for {character_select1}: {char1_se_ep_max}')
-    ])
-
-    button3 = dbc.Button([
-        html.H4(f"{char2_min}"),
-        html.P(f'Min Sentiment for {character_select2}: {char2_se_ep_min}')
-    ])
-
-    button4 = dbc.Button([
-        html.H4(f"{char2_max}"),
-        html.P(f'Max Sentiment for {character_select2}: {char2_se_ep_max}')
-    ])
+    # most_pos2 = s_df2[s_df2['compound']==s_df2['compound'].max()]
+    # most_neg2 = s_df2[s_df2['compound']==s_df2['compound'].min()]
 
 
-    return fig, pos_dt1, neg_dt1, pos_dt2, neg_dt2, button1, button2, button3, button4
+    # most_pos2 = most_pos2.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
+    # most_neg2 = most_neg2.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
+
+    # most_pos2 = most_pos2[['Episode','Title','Description']]#.style.hide_index()
+    # most_neg2 = most_neg2[['Episode','Title','Description']]#.style.hide_index()
+
+    # pos_dt2 = dt.DataTable(
+    #     columns=[{"name": i, "id": i} for i in most_pos2.columns],
+    #     data=most_pos2.to_dict('records'),
+    #     style_data={
+    #         'whiteSpace': 'normal',
+    #         'height': '150px',
+    #     },
+    #     style_cell={'textAlign': 'left'}
+    # )
+    # neg_dt2 = dt.DataTable(
+    #     columns=[{"name": i, "id": i} for i in most_neg2.columns],
+    #     data=most_neg2.to_dict('records'),
+    #     style_data={
+    #         'whiteSpace': 'normal',
+    #         'height': '150px',
+    #     },
+    #     style_cell={'textAlign': 'left'}
+    # )
+
+    # button1 = dbc.Button([
+    #     html.H4(f"{char1_min}"),
+    #     html.P(f'Min Sentiment for {character_select1}: {char1_se_ep_min}')
+    # ],style={'background-color':'#686cfc'})
+
+    # button2 = dbc.Button([
+    #     html.H4(f"{char1_max}"),
+    #     html.P(f'Max Sentiment for {character_select1}: {char1_se_ep_max}')
+    # ],style={'background-color':'#686cfc'})
+
+    # button3 = dbc.Button([
+    #     html.H4(f"{char2_min}"),
+    #     html.P(f'Min Sentiment for {character_select2}: {char2_se_ep_min}')
+    # ],style={'background-color':'#f0543c'})
+
+    # button4 = dbc.Button([
+    #     html.H4(f"{char2_max}"),
+    #     html.P(f'Max Sentiment for {character_select2}: {char2_se_ep_max}')
+    # ],style={'background-color':'#f0543c'})
+
+
+    return fig#, pos_dt1, neg_dt1, pos_dt2, neg_dt2#, button1, button2, button3, button4
 
 
 @app.callback(
@@ -1491,7 +1494,7 @@ def network(season_select, episode_select, character_select1, character_select2)
     new_df = df_pairs[(df_pairs['Source']==character_select1)|(df_pairs['Source']==character_select2)]
 
 
-
+#look at this for clues about how to get the color in here
     node_list = list(
         set(new_df['Source'].unique().tolist()+new_df['Target'].unique().tolist())
     )
@@ -1499,6 +1502,7 @@ def network(season_select, episode_select, character_select1, character_select2)
     nodes = [{
         'id': node_name, 
         'label': node_name,
+        'color':df_pairs['Source'],
         'shape':'dot',
         'size':15
         }
@@ -1587,58 +1591,58 @@ def twitter_sentiment(season_select,episode_select):
 
 
 
-@app.callback(
-    Output("modal1", "is_open"),
-    [Input("open1", "n_clicks"), 
-    Input("close1", "n_clicks")],
-    [State("modal1", "is_open")],
-)
+# @app.callback(
+#     Output("modal1", "is_open"),
+#     [Input("open1", "n_clicks"), 
+#     Input("close1", "n_clicks")],
+#     [State("modal1", "is_open")],
+# )
 
-def toggle_modal1(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
-
-
-@app.callback(
-    Output("modal2", "is_open"),
-    [Input("open2", "n_clicks"), 
-    Input("close2", "n_clicks")],
-    [State("modal2", "is_open")],
-)
-
-def toggle_modal2(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+# def toggle_modal1(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open
 
 
-@app.callback(
-    Output("modal3", "is_open"),
-    [Input("open3", "n_clicks"), 
-    Input("close3", "n_clicks")],
-    [State("modal3", "is_open")],
-)
+# @app.callback(
+#     Output("modal2", "is_open"),
+#     [Input("open2", "n_clicks"), 
+#     Input("close2", "n_clicks")],
+#     [State("modal2", "is_open")],
+# )
 
-def toggle_modal2(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
-
-@app.callback(
-    Output("modal4", "is_open"),
-    [Input("open4", "n_clicks"), 
-    Input("close4", "n_clicks")],
-    [State("modal4", "is_open")],
-)
-
-def toggle_modal2(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+# def toggle_modal2(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open
 
 
+# @app.callback(
+#     Output("modal3", "is_open"),
+#     [Input("open3", "n_clicks"), 
+#     Input("close3", "n_clicks")],
+#     [State("modal3", "is_open")],
+# )
 
-#app.run_server(host='0.0.0.0',port='8055')
-if __name__=='__main__':
-	app.run_server()
+# def toggle_modal3(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open
+
+# @app.callback(
+#     Output("modal4", "is_open"),
+#     [Input("open4", "n_clicks"), 
+#     Input("close4", "n_clicks")],
+#     [State("modal4", "is_open")],
+# )
+
+# def toggle_modal4(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open
+
+
+
+app.run_server(host='0.0.0.0',port='8055')
+# if __name__=='__main__':
+# 	app.run_server()
