@@ -1,6 +1,7 @@
 #Date Created: 08/13/21
 #Date Last Modified: 01/07/22
 #-----------------------------------------------#
+from dash_bootstrap_components._components.Card import Card
 from numpy.core.numeric import full
 import pandas as pd
 import numpy as np
@@ -468,7 +469,7 @@ app.layout = html.Div([
                 dbc.Row([
                     dbc.Col([
                         dcc.Dropdown(
-                            id='dropdown1',
+                            id='dropdown0',
                             options=[{'label': i, 'value': i} for i in season_choices],
                             value=season_choices[0]
                         )
@@ -558,92 +559,25 @@ app.layout = html.Div([
                         labelStyle={'display': 'inline-block','text-align': 'left'}
                     )
                 ],width=4)
-            ]),   
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card(id='card5')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card6')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card7')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card8')
+                ],width=3),
+            ],no_gutters=True),   
             dbc.Row([     
                 dbc.Col([
                     dcc.Graph(id='sentiment_line_graph'),
                 ],width=12),
-            #     dbc.Col([
-            #         dbc.Button(block=True,id='open2',style={'background-color':'#686cfc'}),
-            #         dbc.Button(block=True,id='open1',style={'background-color':'#686cfc'}),
-            #         dbc.Button(block=True,id='open4',style={'background-color':'#f0543c'}),
-            #         dbc.Button(block=True,id='open3',style={'background-color':'#f0543c'})
-
-            #     ],width=6)
-            # ]),
-            #BUTTON #1 --> Character 1, Minimum Sentiment
-            # html.Div([
-            #     dbc.Modal(
-            #         children=[
-            #             dbc.ModalHeader("Episode Description"),
-            #             dbc.ModalBody(
-            #                 children=[
-            #                     html.P(
-            #                         id="table2",
-            #                         style={'overflow':'auto','maxHeight':'400px'}
-            #                     )
-            #                 ]
-            #             ),
-            #             dbc.ModalFooter(
-            #                 dbc.Button("Close", id="close1", className="ml-auto")
-            #             ),
-            #         ],id="modal1"
-            #     )
-            # ]),
-            # #BUTTON #2 --> Character 1, Maximum Sentiment
-            # html.Div([
-            #     dbc.Modal(
-            #         children=[
-            #             dbc.ModalHeader("Episode Description"),
-            #             dbc.ModalBody(
-            #                 children=[
-            #                     html.P(
-            #                         id='table1',
-            #                         style={'overflow':'auto','maxHeight':'400px'}
-            #                     )
-            #                 ]
-            #             ),
-            #             dbc.ModalFooter(
-            #                 dbc.Button("Close", id="close2", className="ml-auto")
-            #             ),
-            #         ],id="modal2")
-            # ]),
-            # #BUTTON #3 --> Character 2, Minimum Sentiment
-            # html.Div([
-            #     dbc.Modal(
-            #         children=[
-            #             dbc.ModalHeader("Episode Description"),
-            #             dbc.ModalBody(
-            #                 children=[
-            #                     html.P(
-            #                         id="table4",
-            #                         style={'overflow':'auto','maxHeight':'400px'}
-            #                     )
-            #                 ]
-            #             ),
-            #             dbc.ModalFooter(
-            #                 dbc.Button("Close", id="close3", className="ml-auto")
-            #             ),
-            #         ],id="modal3"
-            #     )
-            # ]),
-            # #BUTTON #4 --> Character 2, Maximum Sentiment
-            # html.Div([
-            #     dbc.Modal(
-            #         children=[
-            #             dbc.ModalHeader("Episode Description"),
-            #             dbc.ModalBody(
-            #                 children=[
-            #                     html.P(
-            #                         id='table3',
-            #                         style={'overflow':'auto','maxHeight':'400px'}
-            #                     )
-            #                 ]
-            #             ),
-            #             dbc.ModalFooter(
-            #                 dbc.Button("Close", id="close4", className="ml-auto")
-            #             ),
-            #         ],id="modal4")
             ])                       
         
         ]),
@@ -695,6 +629,20 @@ app.layout = html.Div([
                 )
 
             ]),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card(id='card9')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card10')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card11')
+                ],width=3),
+                dbc.Col([
+                    dbc.Card(id='card12')
+                ],width=3),
+            ],no_gutters=True),
             dbc.Row([
                 dbc.Col(
                     visdcc.Network(
@@ -783,57 +731,61 @@ def render_content(tab):
             html.H3('Tab content 4')
         ])
 
+@app.callback(
+    Output('first-dropdown', 'children'),
+    Input('dropdown0', 'value') #----- Select the season
+)
+def set_character_options(selected_season):
+    return dcc.Dropdown(
+        id='dropdown1',
+        options=[{'label': i, 'value': i} for i in season_character_dict[selected_season]],
+        value=season_character_dict[selected_season][0]
+        )
+
+
+@app.callback(
+    Output('second-dropdown','children'),
+    Input('dropdown1','value'),
+)
+def update_second_dropdown(value):
+    updated_choose_character = all_main_chars_list.copy()
+    updated_choose_character.remove(value)
+    return dcc.Dropdown(
+        id='dropdown2',
+        options=[{'label': i, 'value': i} for i in updated_choose_character]
+    )
+
+
+
 # @app.callback(
-#     Output('dropdown2b','options'),
-#     Input('dropdown2','value')
+#     Output('dropdown1', 'options'),#-----Filters the character options
+#     Output('dropdown1', 'value'),
+#     Input('dropdown0', 'value') #----- Select the season
+# )
+# def set_character_options(selected_season):
+#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0]
+
+@app.callback(
+    Output('dropdown2', 'options'), #-----Filters the character options
+    Output('dropdown2', 'value'),
+    Input('dropdown0', 'value') #----- Select the season
+)
+def set_character_options2(selected_season):
+    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
+
+
+
+# @app.callback(
+#     Output('dropdown2','options'),
+#     Input('dropdown1','value')
 # )
 # def update_second_dropdown_again(value):
 #     updated_choose_character = all_main_chars_list.copy()
 #     updated_choose_character.remove(value)
 #     return [{'label': i, 'value': i} for i in updated_choose_character]
 
-@app.callback(
-    Output('first-dropdown', 'children'),
-    Input('dropdown1', 'value') #----- Select the season
-)
-def set_character_options(selected_season):
-    return dcc.Dropdown(
-        id='dropdown2',
-        options=[{'label': i, 'value': i} for i in season_character_dict[selected_season]],
-        value=season_character_dict[selected_season][1]
-        )
 
 
-@app.callback(
-    Output('second-dropdown','children'),
-    Input('dropdown2','value'),
-)
-def update_second_dropdown(value):
-    updated_choose_character = all_main_chars_list.copy()
-    updated_choose_character.remove(value)
-    return dcc.Dropdown(
-        id='dropdown2b',
-        options=[{'label': i, 'value': i} for i in updated_choose_character],
-        # value=
-    )
-
-
-
-@app.callback(
-    Output('dropdown2', 'options'),#-----Filters the character options
-    Output('dropdown2', 'value'),
-    Input('dropdown1', 'value') #----- Select the season
-)
-def set_character_options(selected_season):
-    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0]
-
-@app.callback(
-    Output('dropdown2b', 'options'), #-----Filters the character options
-    Output('dropdown2b', 'value'),
-    Input('dropdown1', 'value') #----- Select the season
-)
-def set_character_options2(selected_season):
-    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
 
 
 @app.callback(
@@ -931,9 +883,9 @@ def set_episode_options(selected_season):
 @app.callback(
     Output('word_freq_graph1','figure'),
     Output('word_freq_graph2','figure'),
+    Input('dropdown0','value'),
     Input('dropdown1','value'),
     Input('dropdown2','value'),
-    Input('dropdown2b','value'),
     Input('num_words_slider','value')
 )
 
@@ -1030,9 +982,9 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
     Output('card2', 'children'),
     Output('card3', 'children'),
     Output('card4', 'children'),
+    Input('dropdown0', 'value'),
     Input('dropdown1', 'value'),
-    Input('dropdown2', 'value'),
-    Input('dropdown2b', 'value')
+    Input('dropdown2', 'value')
 
 )
 
@@ -1071,30 +1023,13 @@ def speech_stats(season_select,character_select1,character_select2):
     larger_scenes1 = TOTAL_SCENES1-TOTAL_SCENES2
     larger_scenes2 = TOTAL_SCENES2-TOTAL_SCENES1
 
-    #Count % of words shared
-    # denom = top_words1.shape[0] + top_words2.shape[0]
-
-    # in_a = set(top_words1['index'])
-    # in_b = set(top_words2['index'])
-
-    # in_both = in_a.intersection(in_b)
-    # num = len(in_both)
-
-    # words_shared_perc = round((num/denom)*100,1)
-
 
     stacked = pd.concat([top_words1,top_words2])
-    denominator = stacked.drop_duplicates(keep='first')
-    denom = denominator.shape[0]
-
-    dups_removed = stacked.drop_duplicates(keep=False)
-    num = dups_removed.shape[0]
-
+    no_dups = stacked.drop_duplicates(keep='first')
+    denom = no_dups.shape[0]
+    num = stacked.shape[0] - denom
 
     words_shared_perc = round((num/denom)*100,1)
-
-
-
 
 
     if TOTAL_WORDS1 > TOTAL_WORDS2:
@@ -1271,10 +1206,10 @@ def speech_stats(season_select,character_select1,character_select2):
     # Output('table2','children'),
     # Output('table3','children'),
     # Output('table4','children'),
-    # Output('open1','children'),
-    # Output('open2','children'),
-    # Output('open3','children'),
-    # Output('open4','children'),
+    Output('card5','children'),
+    Output('card6','children'),
+    Output('card7','children'),
+    Output('card8','children'),
     Input('dropdown3b','value'),
     Input('dropdown3c','value'),
     Input('radio1','value')
@@ -1294,7 +1229,15 @@ def sentiment(character_select1, character_select2,radio_select):
     sentiment_df1 = sentiment_df1.rename(columns={'compound':f'{character_select1} Sentiment'})
     #sentiment_df1 = sentiment_df1.rename(columns={'compound':'Jim Sentiment'})
 
+    filter_pos1 = sentiment_df1[sentiment_df1[f'{character_select1} Sentiment']>=0]
+    num_pos_days1 = filter_pos1.shape[0]
+    num_days_total1 = sentiment_df1.shape[0]
+    perc_pos_days1 = round((num_pos_days1/num_days_total1)*100,1)
 
+    filter_extreme1 = sentiment_df1[(sentiment_df1[f'{character_select1} Sentiment']>=0.5)|(sentiment_df1[f'{character_select1} Sentiment']<=-0.5)]
+    numerator1 = filter_extreme1.shape[0]
+    denominator1 = sentiment_df1.shape[0]
+    perc_extreme_days1 = round((numerator1/denominator1)*100,1)
 
     sentiment_df2=new_df2.groupby(['season','episode']).agg({'compound':'mean'}).reset_index()
     sentiment_df2['label'] = sentiment_df2['season'] + ", " + sentiment_df2['episode']
@@ -1303,6 +1246,18 @@ def sentiment(character_select1, character_select2,radio_select):
     sentiment_df2 = sentiment_df2.sort_values(["season_num", "episode_num"], ascending = (True, True))
     sentiment_df2 = sentiment_df2.rename(columns={'compound':f'{character_select2} Sentiment'})
     #sentiment_df2 = sentiment_df2.rename(columns={'compound':'Angela Sentiment'})
+
+    filter_pos2 = sentiment_df2[sentiment_df2[f'{character_select2} Sentiment']>=0]
+    num_pos_days2 = filter_pos2.shape[0]
+    num_days_total2 = sentiment_df2.shape[0]
+    perc_pos_days2 = round((num_pos_days2/num_days_total2)*100,1)
+
+
+    filter_extreme2 = sentiment_df2[(sentiment_df2[f'{character_select2} Sentiment']>=0.5)|(sentiment_df2[f'{character_select2} Sentiment']<=-0.5)]
+    numerator2 = filter_extreme2.shape[0]
+    denominator2 = sentiment_df2.shape[0]
+    perc_extreme_days2 = round((numerator2/denominator2)*100,1)
+
 
     #Join datasets - full outer
     sentiment_df = pd.merge(sentiment_df1,sentiment_df2,how='outer',on=['season','episode','season_num','episode_num','label'])
@@ -1327,7 +1282,7 @@ def sentiment(character_select1, character_select2,radio_select):
             "label": "Episodes"
         }
     )
-    fig.update_xaxes(showticklabels=False)
+    fig.update_xaxes(showticklabels=False,showspikes=True)
     fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="black")
 
     if "Show Min/Max Lines" in radio_select:
@@ -1339,7 +1294,9 @@ def sentiment(character_select1, character_select2,radio_select):
 
     fig.update_yaxes(
         range = [-1,1],
-        title='Sentiment')
+        title='Sentiment',
+        showspikes=True
+    )
 
     fig.update_layout(
         title={
@@ -1357,6 +1314,60 @@ def sentiment(character_select1, character_select2,radio_select):
             x=1
         )
     )
+    card5 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select1}: {perc_pos_days1}% of positive days')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#2E91E5',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    card6 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select1}: {perc_extreme_days1}% of extreme days')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#2E91E5',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    card7 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select2}: {perc_pos_days2}% of positive days')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#D7504D',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    card8 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select2}: {perc_extreme_days2}% of extreme days')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#D7504D',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
     #fig.update_traces(line_color='#2E91E5')
     #fig.update_traces(marker_color='#D7504D')
 
@@ -1455,11 +1466,15 @@ def sentiment(character_select1, character_select2,radio_select):
     # ],style={'background-color':'#f0543c'})
 
 
-    return fig#, pos_dt1, neg_dt1, pos_dt2, neg_dt2#, button1, button2, button3, button4
+    return fig, card5, card6, card7, card8#, pos_dt1, neg_dt1, pos_dt2, neg_dt2#, button1, button2, button3, button4
 
 
 @app.callback(
     Output('net','data'),
+    Output('card9','children'),
+    Output('card10','children'),
+    Output('card11','children'),
+    Output('card12','children'),
     Input('dropdown4','value'),
     Input('dropdown7','value'),
     Input('dropdown5','value'),
@@ -1520,7 +1535,68 @@ def network(season_select, episode_select, character_select1, character_select2)
         })
 
     data = {'nodes':nodes, 'edges': edges}
-    return data
+
+
+    card9 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'X person with most scenes')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'grey',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+    card10 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'X person who talked to the most people')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'grey',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    card11 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select1}: most scenes with X person')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#2391E5',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    card12 = dbc.Card([
+            dbc.CardBody([
+                html.H6(f'{character_select2}: most scenes with X person')
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#D7504D',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+
+
+
+
+    return data, card9, card10, card11, card12
 
 #Twitter Sentiment Over Time
 @app.callback(
@@ -1588,59 +1664,6 @@ def twitter_sentiment(season_select,episode_select):
 
 
     return fig, fig_wordcloud
-
-
-
-# @app.callback(
-#     Output("modal1", "is_open"),
-#     [Input("open1", "n_clicks"), 
-#     Input("close1", "n_clicks")],
-#     [State("modal1", "is_open")],
-# )
-
-# def toggle_modal1(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
-
-
-# @app.callback(
-#     Output("modal2", "is_open"),
-#     [Input("open2", "n_clicks"), 
-#     Input("close2", "n_clicks")],
-#     [State("modal2", "is_open")],
-# )
-
-# def toggle_modal2(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
-
-
-# @app.callback(
-#     Output("modal3", "is_open"),
-#     [Input("open3", "n_clicks"), 
-#     Input("close3", "n_clicks")],
-#     [State("modal3", "is_open")],
-# )
-
-# def toggle_modal3(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
-
-# @app.callback(
-#     Output("modal4", "is_open"),
-#     [Input("open4", "n_clicks"), 
-#     Input("close4", "n_clicks")],
-#     [State("modal4", "is_open")],
-# )
-
-# def toggle_modal4(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
-
 
 
 app.run_server(host='0.0.0.0',port='8055')
