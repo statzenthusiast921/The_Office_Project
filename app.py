@@ -1,5 +1,5 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/09/22
+#Date Last Modified: 01/12/22
 #-----------------------------------------------#
 from dash_bootstrap_components._components.Card import Card
 from numpy.core.numeric import full
@@ -25,6 +25,12 @@ from collections import Counter
 import re
 import contractions
 from dash import dash_table as dt
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import NMF
+import random
+
+
 #!pip install visdcc
 import visdcc
 import networkx as nx
@@ -739,7 +745,10 @@ app.layout = html.Div([
                 ],width=3),
             ],no_gutters=True),
             dbc.Row([
-                dbc.Col(
+                dbc.Col([
+                    dcc.Graph(id='episode_topic1', figure={}, config={'displayModeBar': False}),
+                ],width=4),
+                dbc.Col([
                     visdcc.Network(
                         id='net',
                         options = dict(
@@ -756,7 +765,7 @@ app.layout = html.Div([
                             },
                         )
                     )
-                )
+                ],width=8)
             ])
         ]),
         dcc.Tab(label='What does Twitter think?',value='tab-5',style=tab_style, selected_style=tab_selected_style,
@@ -1586,6 +1595,7 @@ def sentiment(character_select1, character_select2,radio_select):
 
 @app.callback(
     Output('net','data'),
+    Output('episode_topic1','figure'),
     Output('card9','children'),
     Output('card10','children'),
     Output('card11','children'),
@@ -1600,8 +1610,80 @@ def network(season_select, episode_select, character_select1, character_select2)
     
     
     filtered = data_for_ng[['season','episode','scene','speaker']]
-    filtered = filtered[filtered['season']==season_select]
-    filtered = filtered[filtered['episode']==episode_select]
+    filtered = filtered[(filtered['season']==season_select) & (filtered['episode']==episode_select)]
+
+    #Person with most scenes stat
+    test = filtered[(filtered['season']==season_select) & (filtered['episode']==episode_select)]
+    test = test[['scene','speaker']]
+    test['ui'] = test['scene'] + '_'+ test['speaker']
+    remove_rows = pd.DataFrame(test['ui'].drop_duplicates(keep='first'))
+    remove_rows['speaker'] = remove_rows['ui'].str.split('_').str[1]
+
+    test_again = pd.DataFrame(remove_rows.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
+    test_again = test_again.reset_index()
+    person_most_scenes = test_again['speaker'][0]
+
+
+    df1 = the_mains_df[the_mains_df['season']==season_select]
+    df2 = df1[df1['episode']==episode_select]
+    df3 = df2[(df2['speaker']==character_select1)|(df2['speaker']==character_select2)]
+    vectorizer = TfidfVectorizer(max_df=0.95,min_df=2,stop_words='english')
+    dtm = vectorizer.fit_transform(df3['cleaned_text'].values.astype('U'))
+
+
+    nmf_mod = NMF(n_components=10,random_state=42)
+    nmf_mod.fit(dtm)
+
+    office_topics = nmf_mod.transform(dtm)
+
+    office_topic_label = {
+        0:"Topic 1",
+        1:"Topic 2",       
+        2:"Topic 3",
+        3:"Topic 4",
+        4:"Topic 5",
+        5:"Topic 6",
+        6:"Topic 7",
+        7:"Topic 8",
+        8:"Topic 9",
+        9:"Topic 10",
+
+    }
+    
+
+    df3['topic_num'] = office_topics.argmax(axis=1)
+    df3['topic_label'] = df3['topic_num'].map(office_topic_label)
+
+    topic_count = df3.groupby(['topic_label']).size().reset_index(name='counts')
+    topic_count = topic_count.sort_values(by='counts',ascending=False).reset_index()
+    top_topic = topic_count['topic_label'][0]
+
+
+    wc_df = df3[df3['topic_label']==top_topic]
+    
+    dff = wc_df.copy()
+    dff = dff.cleaned_text
+
+    
+    my_wordcloud = WordCloud(
+        background_color='black',
+        height=275,
+        min_word_length = 4
+    ).generate(' '.join(dff))
+
+    fig_wordcloud = px.imshow(
+        my_wordcloud, 
+        template='ggplot2',
+        title="Word Cloud by Topic"
+    )
+    fig_wordcloud.update_layout(margin=dict(l=20, r=20, t=30, b=20))
+    fig_wordcloud.update_xaxes(visible=False)
+    fig_wordcloud.update_yaxes(visible=False)
+
+
+
+
+
 
     def assets_pairs(speakers):
         unique_speakers = set(speakers)
@@ -1654,7 +1736,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card9 = dbc.Card([
             dbc.CardBody([
-                html.H6(f'X person with most scenes')
+                html.H6(f'{person_most_scenes} had the most scenes in this episode.')
             ])
         ],
         style={
@@ -1711,7 +1793,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
 
 
-    return data, card9, card10, card11, card12
+    return data, fig_wordcloud, card9, card10, card11, card12
 
 #Twitter Sentiment Over Time
 @app.callback(
