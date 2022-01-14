@@ -1,6 +1,8 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/12/22
+#Date Last Modified: 01/14/22
 #-----------------------------------------------#
+
+#Import libraries
 from dash_bootstrap_components._components.Card import Card
 from numpy.core.numeric import full
 import pandas as pd
@@ -391,7 +393,6 @@ def get_top_ngram(corpus, n=None):
 
 
 season_episode_character_dictionary = {}
-#filtered = the_mains_df[['season','episode','scene','speaker']]
 
 for season in the_mains_df['season'].unique().tolist():
     df_season = the_mains_df[the_mains_df['season'].eq(season)]
@@ -399,9 +400,11 @@ for season in the_mains_df['season'].unique().tolist():
 
     for episode in df_season['episode'].unique().tolist():
         df_episode = df_season[df_season['episode'].eq(episode)]
-        characters = df_episode['speaker'].unique().tolist()
+        characters = sorted(df_episode['speaker'].unique().tolist())
         season_episode_character_dictionary[season][episode] = characters
 
+#season_episode_character_dictionary['Season 1']
+#season_episode_character_dictionary['Season 1']['Episode 2']
 
 
 tabs_styles = {
@@ -428,35 +431,39 @@ app = dash.Dash(__name__,assets_folder=os.path.join(os.curdir,"assets"))
 server = app.server
 app.layout = html.Div([
     dcc.Tabs([
-        dcc.Tab(label='Welcome',value='tab-1',style=tab_style, selected_style=tab_selected_style,
+        dcc.Tab(label='What is this project about?',value='tab-1',style=tab_style, selected_style=tab_selected_style,
             children=[
                 html.Div([
-                    html.H1(dcc.Markdown('''**Welcome to my Text Analysis of The Office Dashboard**''')),
+                    html.H1(dcc.Markdown('''**Welcome to my Text Analysis of The Office!**''')),
                     html.Br()
                 ]), 
                 html.Div([
                     html.P(dcc.Markdown('''**What is the purpose of this dashboard?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P("This dashboard describes..."),
+                    html.P("This analysis attempts to uncover patterns in the speech of major characters of the show.  The following analyses were conducted:"),
+                    html.P('1.) Descriptive Analyses of the words, lines, and scenes by character'),
+                    html.P('2.) Sentiment Analysis for each character'),
+                    html.P('3.) Graph Database of Character Connections per Episode and Topic Modelling'),
+                    html.P('4.) Analysis of data scraped from Twitter'),
                     html.Br()
                 ]),
                 html.Div([
                     html.P(dcc.Markdown('''**What data is being used for this analysis?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P(["blah"]),
+                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#'), ' for the majority of the analysis.  Further, complementary data was obtained from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1'), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)'), " Twitter data was scraped using functions under the TWINT library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
                     html.Br()
                 ]),
                 html.Div([
                     html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P("blah.")
+                    html.P("Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping were inconsistent.")
                 ])
             ]
         ),
-        dcc.Tab(label='Comparing Dialogues',value='tab-2',style=tab_style, selected_style=tab_selected_style,
+        dcc.Tab(label='How does their speech differ?',value='tab-2',style=tab_style, selected_style=tab_selected_style,
         children=[
                 dbc.Row([
                     dbc.Col([
@@ -569,7 +576,7 @@ app.layout = html.Div([
                             {'label': 'Show Min/Max Callouts', 'value': 'Show Min/Max Callouts'},
                             {'label': 'Hide Min/Max Callouts', 'value': 'Hide Min/Max Callouts'}
                         ],
-                        value='Hide Min/Max Callouts',
+                        value='Show Min/Max Callouts',
                         labelStyle={'display': 'inline-block','text-align': 'left'}
                     )
                 ],width=4)
@@ -682,7 +689,7 @@ app.layout = html.Div([
                     ],id="modal4")
             ])                           
         ]),
-        dcc.Tab(label='Network of Communication',value='tab-4',style=tab_style, selected_style=tab_selected_style,
+        dcc.Tab(label='How is everyone connected?',value='tab-4',style=tab_style, selected_style=tab_selected_style,
         children=[
             dbc.Row([
                 dbc.Col([
@@ -746,9 +753,7 @@ app.layout = html.Div([
             ],no_gutters=True),
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(id='episode_topic1', figure={}, config={'displayModeBar': False}),
-                ],width=4),
-                dbc.Col([
+                    html.Label(dcc.Markdown('''**Who was in their network?**''')),
                     visdcc.Network(
                         id='net',
                         options = dict(
@@ -765,8 +770,15 @@ app.layout = html.Div([
                             },
                         )
                     )
-                ],width=8)
-            ])
+                ],width=6),
+                dbc.Col([
+                    html.Label(dcc.Markdown('''**What topic connects these characters?**''')),
+                    dcc.Graph(id='episode_topic1', figure={}, config={'displayModeBar': True}),
+                    dcc.Graph(id='episode_topic2', figure={}, config={'displayModeBar': False}),
+                    dcc.Graph(id='episode_topic3', figure={}, config={'displayModeBar': False}),
+
+                ],width=6)
+            ],no_gutters=True)
         ]),
         dcc.Tab(label='What does Twitter think?',value='tab-5',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -921,26 +933,6 @@ def update_second_dropdown(value):
 #     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
 
 
-
-
-
-@app.callback(
-    Output('dropdown5', 'options'),
-    Output('dropdown5', 'value'),
-    Input('dropdown4', 'value') #--> choose season
-)
-def set_character_options2(selected_season):
-    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0],
-
-
-@app.callback(
-    Output('dropdown6', 'options'),
-    Output('dropdown6', 'value'),
-    Input('dropdown4', 'value') #--> choose season
-)
-def set_character_options2(selected_season):
-    return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1],
-
 @app.callback(
     Output('dropdown7', 'options'), #--> filter episodes
     Output('dropdown7', 'value'),
@@ -948,6 +940,50 @@ def set_character_options2(selected_season):
 )
 def set_episode_options(selected_season):
     return [{'label': i, 'value': i} for i in season_episode_dict[selected_season]], season_episode_dict[selected_season][0],
+
+
+
+
+
+@app.callback(
+    Output('dropdown5', 'options'),
+    Output('dropdown5', 'value'),
+    Input('dropdown4', 'value'),
+    Input('dropdown7', 'value')
+)
+def set_character_options_network_graph(selected_season,selected_episode):
+    return [{'label': i, 'value': i} for i in season_episode_character_dictionary[selected_season][selected_episode]], season_episode_character_dictionary[selected_season][selected_episode][0],
+
+
+@app.callback(
+    Output('dropdown6', 'options'),
+    Output('dropdown6', 'value'),
+    Input('dropdown4', 'value'),
+    Input('dropdown7', 'value')
+)
+def set_character_options_network_graph(selected_season,selected_episode):
+    return [{'label': i, 'value': i} for i in season_episode_character_dictionary[selected_season][selected_episode]], season_episode_character_dictionary[selected_season][selected_episode][1],
+
+
+
+
+# @app.callback(
+#     Output('dropdown5', 'options'),
+#     Output('dropdown5', 'value'),
+#     Input('dropdown4', 'value') #--> choose season
+# )
+# def set_character_options2(selected_season):
+#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0],
+
+
+# @app.callback(
+#     Output('dropdown6', 'options'),
+#     Output('dropdown6', 'value'),
+#     Input('dropdown4', 'value') #--> choose season
+# )
+# def set_character_options2(selected_season):
+#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1],
+
 
 @app.callback(
     Output('dropdown9', 'options'), #--> filter episodes
@@ -1596,6 +1632,9 @@ def sentiment(character_select1, character_select2,radio_select):
 @app.callback(
     Output('net','data'),
     Output('episode_topic1','figure'),
+    Output('episode_topic2','figure'),
+    Output('episode_topic3','figure'),
+
     Output('card9','children'),
     Output('card10','children'),
     Output('card11','children'),
@@ -1613,8 +1652,8 @@ def network(season_select, episode_select, character_select1, character_select2)
     filtered = filtered[(filtered['season']==season_select) & (filtered['episode']==episode_select)]
 
     #Person with most scenes stat
-    test = filtered[(filtered['season']==season_select) & (filtered['episode']==episode_select)]
-    test = test[['scene','speaker']]
+    #test = filtered[(filtered['season']=="Season 5") & (filtered['episode']=="Episode 3")]
+    test = filtered[['scene','speaker']]
     test['ui'] = test['scene'] + '_'+ test['speaker']
     remove_rows = pd.DataFrame(test['ui'].drop_duplicates(keep='first'))
     remove_rows['speaker'] = remove_rows['ui'].str.split('_').str[1]
@@ -1624,6 +1663,26 @@ def network(season_select, episode_select, character_select1, character_select2)
     person_most_scenes = test_again['speaker'][0]
 
 
+    #Most scenes with character1
+    remove_rows['scene'] = remove_rows['ui'].str.split('_').str[0]
+
+    only_scenes_with_char1 = remove_rows[remove_rows['speaker']==character_select1]
+    the_scenes1 = only_scenes_with_char1['scene'].to_list()
+    peeps_with_char1 = remove_rows[remove_rows['scene'].isin(the_scenes1)]
+    char1_paired = pd.DataFrame(peeps_with_char1.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
+    char1_paired = char1_paired.reset_index()
+    paired1_most_scenes = char1_paired['speaker'][1]
+
+    #Most scenes with character 2
+    only_scenes_with_char2 = remove_rows[remove_rows['speaker']==character_select2]
+    the_scenes2 = only_scenes_with_char2['scene'].to_list()
+    peeps_with_char2 = remove_rows[remove_rows['scene'].isin(the_scenes2)]
+    char2_paired = pd.DataFrame(peeps_with_char2.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
+    char2_paired = char2_paired.reset_index()
+    paired2_most_scenes = char2_paired['speaker'][1]
+
+
+    #Topic Modelling
     df1 = the_mains_df[the_mains_df['season']==season_select]
     df2 = df1[df1['episode']==episode_select]
     df3 = df2[(df2['speaker']==character_select1)|(df2['speaker']==character_select2)]
@@ -1656,29 +1715,67 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     topic_count = df3.groupby(['topic_label']).size().reset_index(name='counts')
     topic_count = topic_count.sort_values(by='counts',ascending=False).reset_index()
-    top_topic = topic_count['topic_label'][0]
+    top_topics = topic_count['topic_label'][0:3].to_list()
 
 
-    wc_df = df3[df3['topic_label']==top_topic]
+    wc_df1 = df3[df3['topic_label']==top_topics[0]]
+    wc_df2 = df3[df3['topic_label']==top_topics[1]]
+    wc_df3 = df3[df3['topic_label']==top_topics[2]]
+
     
-    dff = wc_df.copy()
-    dff = dff.cleaned_text
+    df1= wc_df1.copy()
+    df1 = df1.cleaned_text
 
-    
-    my_wordcloud = WordCloud(
+    my_wordcloud1 = WordCloud(
         background_color='black',
-        height=275,
+        height=100,
         min_word_length = 4
-    ).generate(' '.join(dff))
+    ).generate(' '.join(df1))
 
-    fig_wordcloud = px.imshow(
-        my_wordcloud, 
+    fig_wordcloud1 = px.imshow(
+        my_wordcloud1, 
         template='ggplot2',
-        title="Word Cloud by Topic"
+        title="Most Frequently Discussed Topic"
     )
-    fig_wordcloud.update_layout(margin=dict(l=20, r=20, t=30, b=20))
-    fig_wordcloud.update_xaxes(visible=False)
-    fig_wordcloud.update_yaxes(visible=False)
+    fig_wordcloud1.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+    fig_wordcloud1.update_xaxes(visible=False)
+    fig_wordcloud1.update_yaxes(visible=False)
+
+    df2= wc_df2.copy()
+    df2 = df2.cleaned_text
+
+    my_wordcloud2 = WordCloud(
+        background_color='black',
+        height=100,
+        min_word_length = 4
+    ).generate(' '.join(df2))
+
+    fig_wordcloud2 = px.imshow(
+        my_wordcloud2, 
+        template='ggplot2',
+        title="2nd Most Frequently Discussed Topic"
+    )
+    fig_wordcloud2.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+    fig_wordcloud2.update_xaxes(visible=False)
+    fig_wordcloud2.update_yaxes(visible=False)
+
+    df3= wc_df3.copy()
+    df3 = df3.cleaned_text
+
+    my_wordcloud3 = WordCloud(
+        background_color='black',
+        height=100,
+        min_word_length = 4
+    ).generate(' '.join(df3))
+
+    fig_wordcloud3 = px.imshow(
+        my_wordcloud3, 
+        template='ggplot2',
+        title="3rd Most Frequently Discussed Topic"
+    )
+    #fig_wordcloud3.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+    fig_wordcloud3.update_xaxes(visible=False)
+    fig_wordcloud3.update_yaxes(visible=False)
 
 
 
@@ -1736,7 +1833,8 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card9 = dbc.Card([
             dbc.CardBody([
-                html.H6(f'{person_most_scenes} had the most scenes in this episode.')
+                html.H4(f'{person_most_scenes}'),
+                html.P('Most scenes in this episode.')
             ])
         ],
         style={
@@ -1749,7 +1847,9 @@ def network(season_select, episode_select, character_select1, character_select2)
         outline=True)
     card10 = dbc.Card([
             dbc.CardBody([
-                html.H6(f'X person who talked to the most people')
+                html.H4('X person'),
+                html.P('Some metric for this episode.')
+
             ])
         ],
         style={
@@ -1763,7 +1863,9 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card11 = dbc.Card([
             dbc.CardBody([
-                html.H6(f'{character_select1}: most scenes with X person')
+                html.H4(f'{paired1_most_scenes}'),
+                html.P(f'Most scenes with {character_select1}')
+
             ])
         ],
         style={
@@ -1777,7 +1879,9 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card12 = dbc.Card([
             dbc.CardBody([
-                html.H6(f'{character_select2}: most scenes with X person')
+                html.H4(f'{paired2_most_scenes}'),
+                html.P(f'Most scenes with {character_select2}')
+
             ])
         ],
         style={
@@ -1793,7 +1897,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
 
 
-    return data, fig_wordcloud, card9, card10, card11, card12
+    return data, fig_wordcloud1, fig_wordcloud2, fig_wordcloud3, card9, card10, card11, card12
 
 #Twitter Sentiment Over Time
 @app.callback(
@@ -1855,7 +1959,7 @@ def twitter_sentiment(season_select,episode_select):
 
     fig_wordcloud = px.imshow(my_wordcloud, template='ggplot2',
                               title="Word Cloud by Season and Episode")
-    fig_wordcloud.update_layout(margin=dict(l=20, r=20, t=30, b=20))
+    fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
     fig_wordcloud.update_xaxes(visible=False)
     fig_wordcloud.update_yaxes(visible=False)
 
