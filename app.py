@@ -4,7 +4,7 @@
 
 #Import libraries
 from dash_bootstrap_components._components.Card import Card
-from numpy.core.numeric import full
+from numpy.core.numeric import True_, full
 import pandas as pd
 import numpy as np
 import dash
@@ -318,15 +318,15 @@ filtered = data_for_ng[['season','episode','scene','speaker']]
 
 
 #Create a season-character dictionary
-season_character_dict = {'Season 1': ['Angela', 'Darryl', 'Dwight', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 2': ['Angela','Creed', 'Darryl', 'David Wallace', 'Dwight', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 3': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight', 'Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 4': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Holly', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
-                         'Season 5': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Erin','Holly', 'Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
-                         'Season 6': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Erin','Gabe','Holly','Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 7': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Erin','Gabe','Holly','Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 8': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Erin','Gabe', 'Jim','Kelly','Kevin','Meredith','Oscar','Pam','Phyllis','Ryan','Stanley','Toby','Todd Packer'],
-                         'Season 9': ['Andy', 'Angela','Creed', 'Darryl', 'David Wallace', 'Dwight','Erin','Gabe','Jan','Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby','Todd Packer']
+season_character_dict = {'Season 1': ['Angela', 'Darryl', 'Dwight', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
+                         'Season 2': ['Angela','Creed', 'Darryl', 'Dwight', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
+                         'Season 3': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight', 'Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
+                         'Season 4': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Holly', 'Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
+                         'Season 5': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Erin','Holly', 'Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby'],
+                         'Season 6': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Erin','Gabe','Holly','Jan', 'Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Ryan','Stanley','Toby'],
+                         'Season 7': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Erin','Gabe','Holly','Jan', 'Jim','Karen','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Ryan','Stanley','Toby'],
+                         'Season 8': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Erin','Gabe', 'Jim','Kelly','Kevin','Meredith','Oscar','Pam','Phyllis','Ryan','Stanley','Toby'],
+                         'Season 9': ['Andy', 'Angela','Creed', 'Darryl', 'Dwight','Erin','Gabe','Jan','Jim','Kelly','Kevin','Meredith','Michael','Oscar','Pam','Phyllis','Roy','Ryan','Stanley','Toby']
 }
 
 
@@ -573,10 +573,10 @@ app.layout = html.Div([
                      dbc.RadioItems(
                         id='radio1',
                         options=[
-                            {'label': 'Show Min/Max Callouts', 'value': 'Show Min/Max Callouts'},
-                            {'label': 'Hide Min/Max Callouts', 'value': 'Hide Min/Max Callouts'}
+                            {'label': 'Show Callouts', 'value': 'Show Callouts'},
+                            {'label': 'Hide Callouts', 'value': 'Hide Callouts'}
                         ],
-                        value='Show Min/Max Callouts',
+                        value='Show Callouts',
                         labelStyle={'display': 'inline-block','text-align': 'left'}
                     )
                 ],width=4)
@@ -753,7 +753,7 @@ app.layout = html.Div([
             ],no_gutters=True),
             dbc.Row([
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Who was in their network?**''')),
+                    html.Label(dcc.Markdown('''**Who was in their network?**'''),style={'text-align':'center'}),
                     visdcc.Network(
                         id='net',
                         options = dict(
@@ -768,14 +768,24 @@ app.layout = html.Div([
                                 'onlyDynamicEdges': 'false',
                                 'fit': 'true'
                             },
+                            scaling='value'
                         )
                     )
                 ],width=6),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**What topic connects these characters?**''')),
-                    dcc.Graph(id='episode_topic1', figure={}, config={'displayModeBar': True}),
-                    dcc.Graph(id='episode_topic2', figure={}, config={'displayModeBar': False}),
-                    dcc.Graph(id='episode_topic3', figure={}, config={'displayModeBar': False}),
+                    html.Label(dcc.Markdown('''**Which topics connect these characters?**''')),
+                    dbc.RadioItems(
+                        id='radio2',
+                        options=[
+                            {'label': 'Show Most Frequently Discussed Topic', 'value': 'Show Most Frequently Discussed Topic'},
+                            {'label': 'Show 2nd Most Frequently Discussed Topic', 'value': 'Show 2nd Most Frequently Discussed Topic'},
+                            {'label': 'Show 3rd Most Frequently Discussed Topic','value': 'Show 3rd Most Frequently Discussed Topic'},
+
+                        ],
+                        value='Show Most Frequently Discussed Topic',
+                        labelStyle={'display': 'inline-block','text-align': 'left'}
+                    ),
+                    dcc.Graph(id='episode_topic', figure={}, config={'displayModeBar': True}),
 
                 ],width=6)
             ],no_gutters=True)
@@ -915,24 +925,6 @@ def update_second_dropdown(value):
 
 
 
-# @app.callback(
-#     Output('dropdown3b', 'options'),
-#     Output('dropdown3b', 'value'),
-#     Input('dropdown3', 'value')
-# )
-# def set_character_options3(selected_season):
-#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0]
-
-
-# @app.callback(
-#     Output('dropdown3c', 'options'),
-#     Output('dropdown3c', 'value'),
-#     Input('dropdown3', 'value')
-# )
-# def set_character_options4(selected_season):
-#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
-
-
 @app.callback(
     Output('dropdown7', 'options'), #--> filter episodes
     Output('dropdown7', 'value'),
@@ -967,24 +959,6 @@ def set_character_options_network_graph(selected_season,selected_episode):
 
 
 
-# @app.callback(
-#     Output('dropdown5', 'options'),
-#     Output('dropdown5', 'value'),
-#     Input('dropdown4', 'value') #--> choose season
-# )
-# def set_character_options2(selected_season):
-#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][0],
-
-
-# @app.callback(
-#     Output('dropdown6', 'options'),
-#     Output('dropdown6', 'value'),
-#     Input('dropdown4', 'value') #--> choose season
-# )
-# def set_character_options2(selected_season):
-#     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1],
-
-
 @app.callback(
     Output('dropdown9', 'options'), #--> filter episodes
     Output('dropdown9', 'value'),
@@ -992,31 +966,6 @@ def set_character_options_network_graph(selected_season,selected_episode):
 )
 def set_episode_options(selected_season):
     return [{'label': i, 'value': i} for i in season_episode_dict[selected_season]], season_episode_dict[selected_season][0],
-
-# #Define callback for available characters by season,episode
-# @app.callback(
-#     Output('dropdown5', 'options'), #--> filter character1
-#     Output('dropdown5', 'value'),
-#     Input('dropdown8', 'value'), #--> choose season
-#     Input('dropdown9', 'value') #--> choose episode
-
-# )
-# def set_season_episode_character_options1(selected_season,selected_episode):
-#     return [{'label': i, 'value': i} for i in season_episode_character_dictionary[selected_season][selected_episode]], season_episode_character_dictionary[selected_season][selected_episode][0],
-
-# #Define callback for available characters by season,episode
-# @app.callback(
-#     Output('dropdown6', 'options'), #--> filter character2
-#     Output('dropdown6', 'value'),
-#     Input('dropdown8', 'value'), #--> choose season
-#     Input('dropdown9', 'value') #--> choose episode
-
-# )
-# def set_season_episode_character_options2(selected_season,selected_episode):
-#     return [{'label': i, 'value': i} for i in season_episode_character_dictionary[selected_season][selected_episode]], season_episode_character_dictionary[selected_season][selected_episode][1],
-
-
-
 
 
 
@@ -1377,7 +1326,6 @@ def sentiment(character_select1, character_select2,radio_select):
     sentiment_df1['episode_num'] = sentiment_df1['episode'].str.slice(8).astype(int)
     sentiment_df1 = sentiment_df1.sort_values(["season_num", "episode_num"], ascending = (True, True))
     sentiment_df1 = sentiment_df1.rename(columns={'compound':f'{character_select1} Sentiment'})
-    #sentiment_df1 = sentiment_df1.rename(columns={'compound':'Jim Sentiment'})
 
     filter_pos1 = sentiment_df1[sentiment_df1[f'{character_select1} Sentiment']>=0]
     num_pos_days1 = filter_pos1.shape[0]
@@ -1395,7 +1343,6 @@ def sentiment(character_select1, character_select2,radio_select):
     sentiment_df2['episode_num'] = sentiment_df2['episode'].str.slice(8).astype(int)
     sentiment_df2 = sentiment_df2.sort_values(["season_num", "episode_num"], ascending = (True, True))
     sentiment_df2 = sentiment_df2.rename(columns={'compound':f'{character_select2} Sentiment'})
-    #sentiment_df2 = sentiment_df2.rename(columns={'compound':'Angela Sentiment'})
 
     filter_pos2 = sentiment_df2[sentiment_df2[f'{character_select2} Sentiment']>=0]
     num_pos_days2 = filter_pos2.shape[0]
@@ -1411,7 +1358,6 @@ def sentiment(character_select1, character_select2,radio_select):
 
     #Join datasets - full outer
     sentiment_df = pd.merge(sentiment_df1,sentiment_df2,how='outer',on=['season','episode','season_num','episode_num','label'])
-    #sentiment_df.to_csv('/Users/jonzimmerman/Desktop/sentiment_test.csv', index=False)
     sentiment_df = sentiment_df.sort_values(["season_num", "episode_num"], ascending = (True, True))
 
     char1_min = sentiment_df[f'{character_select1} Sentiment'].min()
@@ -1430,22 +1376,23 @@ def sentiment(character_select1, character_select2,radio_select):
         sentiment_df, x="label", y=[f"{character_select1} Sentiment",f"{character_select2} Sentiment"], title='Average Sentiment Over Time',
         labels={
             "label": "Episodes"
-        }
+        }, markers=True
     )
     fig.update_xaxes(showticklabels=False,showspikes=True)
     fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="black")
 
-    if "Show Min/Max Callouts" in radio_select:
-        fig.add_annotation(text=f"{character_select1}: Max Sentiment Episode", x=char1_se_ep_max, y=char1_max, arrowhead=1, showarrow=True)
-        fig.add_annotation(text=f"{character_select1}: Min Sentiment Episode", x=char1_se_ep_min, y=char1_min, arrowhead=1, showarrow=True,align = 'center')
-        fig.add_annotation(text=f"{character_select2}: Max Sentiment Episode", x=char2_se_ep_max, y=char2_max, arrowhead=1, showarrow=True)
-        fig.add_annotation(text=f"{character_select2}: Min Sentiment Episode", x=char2_se_ep_min, y=char2_min, arrowhead=1, showarrow=True,align = 'center')
+    if "Show Callouts" in radio_select:
+        fig.add_annotation(text=f"{character_select1} (Max)", x=char1_se_ep_max, y=char1_max, arrowhead=1, showarrow=True)
+        fig.add_annotation(text=f"{character_select1} (Min)", x=char1_se_ep_min, y=char1_min, arrowhead=1, showarrow=True, ay=45)
+        fig.add_annotation(text=f"{character_select2} (Max)", x=char2_se_ep_max, y=char2_max, arrowhead=1, showarrow=True)
+        fig.add_annotation(text=f"{character_select2} (Min)", x=char2_se_ep_min, y=char2_min, arrowhead=1, showarrow=True, ay=45)
 
     fig.update_yaxes(
         range = [-1,1],
         title='Sentiment',
         showspikes=True
     )
+    fig.update_traces(textposition='top center')
 
     fig.update_layout(
         title={
@@ -1604,26 +1551,22 @@ def sentiment(character_select1, character_select2,radio_select):
     button1 = dbc.Button([
         html.H5(f"{character_select1} Min Sentiment"),
         html.P('Click Here for Episode Description')
-    ]#,style={'background-color':'#686cfc'}
-    )
+    ])
 
     button2 = dbc.Button([
         html.H5(f"{character_select1} Max Sentiment"),
         html.P('Click Here for Episode Description')
-    ]#,style={'background-color':'#686cfc'}
-    )
+    ])
 
     button3 = dbc.Button([
         html.H5(f"{character_select2} Min Sentiment"),
         html.P('Click Here for Episode Description')
-    ]#,style={'background-color':'#f0543c'}
-    )
+    ])
 
     button4 = dbc.Button([
         html.H5(f"{character_select2} Max Sentiment"),
         html.P('Click Here for Episode Description')
-    ]#,style={'background-color':'#f0543c'}
-    )
+    ])
 
 
     return fig, card5, card6, card7, card8, pos_dt1, neg_dt1, pos_dt2, neg_dt2, button1, button2, button3, button4
@@ -1631,10 +1574,7 @@ def sentiment(character_select1, character_select2,radio_select):
 
 @app.callback(
     Output('net','data'),
-    Output('episode_topic1','figure'),
-    Output('episode_topic2','figure'),
-    Output('episode_topic3','figure'),
-
+    Output('episode_topic','figure'),
     Output('card9','children'),
     Output('card10','children'),
     Output('card11','children'),
@@ -1643,9 +1583,10 @@ def sentiment(character_select1, character_select2,radio_select):
     Input('dropdown7','value'),
     Input('dropdown5','value'),
     Input('dropdown6','value'),
+    Input('radio2','value')
 )
 
-def network(season_select, episode_select, character_select1, character_select2):
+def network(season_select, episode_select, character_select1, character_select2, radio_select):
     
     
     filtered = data_for_ng[['season','episode','scene','speaker']]
@@ -1661,6 +1602,7 @@ def network(season_select, episode_select, character_select1, character_select2)
     test_again = pd.DataFrame(remove_rows.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
     test_again = test_again.reset_index()
     person_most_scenes = test_again['speaker'][0]
+    person_num_scenes = test_again['num_scenes'][0]
 
 
     #Most scenes with character1
@@ -1672,6 +1614,7 @@ def network(season_select, episode_select, character_select1, character_select2)
     char1_paired = pd.DataFrame(peeps_with_char1.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
     char1_paired = char1_paired.reset_index()
     paired1_most_scenes = char1_paired['speaker'][1]
+    paried1_num_scenes = char1_paired['num_scenes'][1]
 
     #Most scenes with character 2
     only_scenes_with_char2 = remove_rows[remove_rows['speaker']==character_select2]
@@ -1680,9 +1623,10 @@ def network(season_select, episode_select, character_select1, character_select2)
     char2_paired = pd.DataFrame(peeps_with_char2.groupby(['speaker']).size().reset_index(name = 'num_scenes').sort_values(by='num_scenes',ascending=False))
     char2_paired = char2_paired.reset_index()
     paired2_most_scenes = char2_paired['speaker'][1]
+    paried2_num_scenes = char2_paired['num_scenes'][1]
 
 
-    #Topic Modelling
+    #Topic Modelling - this will be combined into a radio button selection
     df1 = the_mains_df[the_mains_df['season']==season_select]
     df2 = df1[df1['episode']==episode_select]
     df3 = df2[(df2['speaker']==character_select1)|(df2['speaker']==character_select2)]
@@ -1722,64 +1666,59 @@ def network(season_select, episode_select, character_select1, character_select2)
     wc_df2 = df3[df3['topic_label']==top_topics[1]]
     wc_df3 = df3[df3['topic_label']==top_topics[2]]
 
-    
-    df1= wc_df1.copy()
-    df1 = df1.cleaned_text
+    if "Show Most Frequently Discussed Topic" in radio_select:
 
-    my_wordcloud1 = WordCloud(
-        background_color='black',
-        height=100,
-        min_word_length = 4
-    ).generate(' '.join(df1))
+        df1= wc_df1.copy()
+        df1 = df1.cleaned_text
 
-    fig_wordcloud1 = px.imshow(
-        my_wordcloud1, 
-        template='ggplot2',
-        title="Most Frequently Discussed Topic"
-    )
-    fig_wordcloud1.update_layout(margin=dict(l=0, r=0, t=30, b=0))
-    fig_wordcloud1.update_xaxes(visible=False)
-    fig_wordcloud1.update_yaxes(visible=False)
+        my_wordcloud1 = WordCloud(
+            background_color='black',
+            min_word_length = 4
+        ).generate(' '.join(df1))
 
-    df2= wc_df2.copy()
-    df2 = df2.cleaned_text
+        fig_wordcloud = px.imshow(
+            my_wordcloud1, 
+            template='ggplot2'
+        )
+        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+        fig_wordcloud.update_xaxes(visible=False)
+        fig_wordcloud.update_yaxes(visible=False)
 
-    my_wordcloud2 = WordCloud(
-        background_color='black',
-        height=100,
-        min_word_length = 4
-    ).generate(' '.join(df2))
+    if "Show 2nd Most Frequently Discussed Topic" in radio_select:
 
-    fig_wordcloud2 = px.imshow(
-        my_wordcloud2, 
-        template='ggplot2',
-        title="2nd Most Frequently Discussed Topic"
-    )
-    fig_wordcloud2.update_layout(margin=dict(l=0, r=0, t=30, b=0))
-    fig_wordcloud2.update_xaxes(visible=False)
-    fig_wordcloud2.update_yaxes(visible=False)
+        df2= wc_df2.copy()
+        df2 = df2.cleaned_text
 
-    df3= wc_df3.copy()
-    df3 = df3.cleaned_text
+        my_wordcloud2 = WordCloud(
+            background_color='black',
+            min_word_length = 4
+        ).generate(' '.join(df2))
 
-    my_wordcloud3 = WordCloud(
-        background_color='black',
-        height=100,
-        min_word_length = 4
-    ).generate(' '.join(df3))
+        fig_wordcloud = px.imshow(
+            my_wordcloud2, 
+            template='ggplot2'
+        )
+        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+        fig_wordcloud.update_xaxes(visible=False)
+        fig_wordcloud.update_yaxes(visible=False)
 
-    fig_wordcloud3 = px.imshow(
-        my_wordcloud3, 
-        template='ggplot2',
-        title="3rd Most Frequently Discussed Topic"
-    )
-    #fig_wordcloud3.update_layout(margin=dict(l=0, r=0, t=30, b=0))
-    fig_wordcloud3.update_xaxes(visible=False)
-    fig_wordcloud3.update_yaxes(visible=False)
+    if "Show 3rd Most Frequently Discussed Topic" in radio_select:
 
+        df3= wc_df3.copy()
+        df3 = df3.cleaned_text
 
+        my_wordcloud3 = WordCloud(
+            background_color='black',
+            min_word_length = 4
+        ).generate(' '.join(df3))
 
-
+        fig_wordcloud = px.imshow(
+            my_wordcloud3, 
+            template='ggplot2'
+        )
+        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
+        fig_wordcloud.update_xaxes(visible=False)
+        fig_wordcloud.update_yaxes(visible=False)
 
 
     def assets_pairs(speakers):
@@ -1802,7 +1741,6 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     new_df = df_pairs[(df_pairs['Source']==character_select1)|(df_pairs['Source']==character_select2)]
 
-
 #look at this for clues about how to get the color in here
     node_list = list(
         set(new_df['Source'].unique().tolist()+new_df['Target'].unique().tolist())
@@ -1811,9 +1749,10 @@ def network(season_select, episode_select, character_select1, character_select2)
     nodes = [{
         'id': node_name, 
         'label': node_name,
-        'color':df_pairs['Source'],
+        # 'group':new_df['Source'],
+        # 'color':new_df['Source'],
         'shape':'dot',
-        'size':15
+        'size':df_pairs['Weights'].max()
         }
         for i, node_name in enumerate(node_list)]
 
@@ -1833,7 +1772,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card9 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{person_most_scenes}'),
+                html.H4(f'{person_most_scenes} ({person_num_scenes})'),
                 html.P('Most scenes in this episode.')
             ])
         ],
@@ -1863,7 +1802,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card11 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{paired1_most_scenes}'),
+                html.H4(f'{paired1_most_scenes} ({paried1_num_scenes})'),
                 html.P(f'Most scenes with {character_select1}')
 
             ])
@@ -1879,7 +1818,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
     card12 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{paired2_most_scenes}'),
+                html.H4(f'{paired2_most_scenes} ({paried2_num_scenes})'),
                 html.P(f'Most scenes with {character_select2}')
 
             ])
@@ -1897,7 +1836,7 @@ def network(season_select, episode_select, character_select1, character_select2)
 
 
 
-    return data, fig_wordcloud1, fig_wordcloud2, fig_wordcloud3, card9, card10, card11, card12
+    return data, fig_wordcloud, card9, card10, card11, card12
 
 #Twitter Sentiment Over Time
 @app.callback(
@@ -1910,6 +1849,10 @@ def network(season_select, episode_select, character_select1, character_select2)
 def twitter_sentiment(season_select,episode_select):
     new_df = tweet_data[(tweet_data['season']==season_select)]
 
+    wc_df = tweet_data[(tweet_data['season']==season_select) & (tweet_data['episode']==episode_select)]
+    # ep_num_line = wc_df['episode'][0]
+    # vert_line_num = ep_num_line.split()[1]
+    # vert_line_num = int(vert_line_num)
 
     sid = SentimentIntensityAnalyzer()
     new_df['scores'] = new_df['tweet'].apply(lambda tweet: sid.polarity_scores(tweet))
@@ -1942,9 +1885,11 @@ def twitter_sentiment(season_select,episode_select):
             x=1
         )
     )
+    #Add vertical line to graph to move with episode
+    #fig.add_vline(x=vert_line_num,line_width=3, line_dash="dash", line_color="black")
 
 
-    wc_df = tweet_data[(tweet_data['season']==season_select) & (tweet_data['episode']==episode_select)]
+
     
     dff = wc_df.copy()
     dff = dff.cleaned_tweet
