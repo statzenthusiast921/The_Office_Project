@@ -1,5 +1,5 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/14/22
+#Date Last Modified: 01/17/22
 #-----------------------------------------------#
 
 #Import libraries
@@ -195,18 +195,19 @@ office_data['line_text'] = office_data['line_text'].astype('str')
 office_data['cleaned_text'] = office_data['line_text'].str.lower()
 #2.) Remove brackets
 office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_brackets_contents)
-#3.) Lemmatize words
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = lemmatize)
-#4.) Remove stop words
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = removeStopWords)
+#3.) Remove special characters
+office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_special_characters)
+#4.) Remove digits
+office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_digits)
 #5.) Remove punctuation
 office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = punct)
-#6.) Remove special characters
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_special_characters)
-#7.) Remove digits
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_digits)
-#8.) Remove stop words again created from previous functions
+#6.) Lemmatize words
+office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = lemmatize)
+#7.) Remove stop words
 office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = removeStopWords)
+
+
+
 
 
 
@@ -413,7 +414,9 @@ tabs_styles = {
 tab_style = {
     'borderBottom': '1px solid #d6d6d6',
     'padding': '6px',
-    'fontWeight': 'bold'
+    'fontWeight': 'bold',
+    'backgroundColor': '#222222'
+
 }
 
 tab_selected_style = {
@@ -441,25 +444,27 @@ app.layout = html.Div([
                     html.P(dcc.Markdown('''**What is the purpose of this dashboard?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P("This analysis attempts to uncover patterns in the speech of major characters of the show.  The following analyses were conducted:"),
-                    html.P('1.) Descriptive Analyses of the words, lines, and scenes by character'),
-                    html.P('2.) Sentiment Analysis for each character'),
-                    html.P('3.) Graph Database of Character Connections per Episode and Topic Modelling'),
-                    html.P('4.) Analysis of data scraped from Twitter'),
+                    html.P("This analysis attempts to uncover patterns in the speech of major characters of the show.  The following questions were addressed:"),
+                    html.P('1.) How do speech patterns differ between characters and through seasons?'),
+                    html.P('2.) Can sentiment analysis uncover trends and intensities in emotion throughout the show?'),
+                    html.P('3.) Can we understand how and why certain characters are connected in any episode?'),
+                    html.P('4.) Can we glean any insights from social media data?'),
                     html.Br()
                 ]),
                 html.Div([
                     html.P(dcc.Markdown('''**What data is being used for this analysis?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#'), ' for the majority of the analysis.  Further, complementary data was obtained from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1'), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)'), " Twitter data was scraped using functions under the TWINT library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
+                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#'), ' for the majority of the analysis.  Complementary data was obtained from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1'), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)'), " Twitter data was scraped using functions under the ",html.A("TWINT",href='https://pypi.org/project/twint/')," library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
                     html.Br()
                 ]),
                 html.Div([
                     html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
                 ],style={'text-decoration': 'underline'}),
                 html.Div([
-                    html.P("Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping were inconsistent.")
+                    html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping of data were utilized by searching for any tweet that contained '#theoffice'.  Extensive cleaning of relevant tweets and discarding of irrelevant tweets was needed to obtain an useful dataset."),
+                    html.P("2.) The analysis was constrained to only the core set of characters with a few exceptions and their conversations with each other.")
+
                 ])
             ]
         ),
@@ -483,6 +488,8 @@ app.layout = html.Div([
                     dbc.Col([
                         dcc.Dropdown(
                             id='dropdown0',
+                            style={'color':'black'},
+
                             options=[{'label': i, 'value': i} for i in season_choices],
                             value=season_choices[0]
                         )
@@ -490,6 +497,7 @@ app.layout = html.Div([
                     dbc.Col([
                         dcc.Dropdown(
                             id='dropdown1',
+                            style={'color':'black'},
                             options=[{'label': i, 'value': i} for i in main_characters_choose],
                             value=main_characters_choose[0]
                         )
@@ -497,6 +505,7 @@ app.layout = html.Div([
                     dbc.Col([
                         dcc.Dropdown(
                             id='dropdown2',
+                            style={'color':'black'},
                             options=[{'label': i, 'value': i} for i in main_characters_choose],
                             value=main_characters_choose[1]
                         )
@@ -504,14 +513,11 @@ app.layout = html.Div([
                     dbc.Col([
                         dcc.Slider(
                             id='num_words_slider',
-                            min=1,max=5,step=1,value=1,
+                            min=1,max=3,step=1,value=1,
                             marks={
-                                0: '0',
                                 1: '1',
                                 2: '2',
-                                3: '3',
-                                4: '4',
-                                5: '5'
+                                3: '3'
                             }
                         )
                     ],width=3)
@@ -546,40 +552,49 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     html.Label(dcc.Markdown('''**Choose character #1:**'''))
-                ],width=4),
+                ],width=3),
                 dbc.Col([
                     html.Label(dcc.Markdown('''**Choose character #2:**''')),
-                ],width=4),
+                ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose min/max line:**''')),
-                ],width=4)
+                    html.Label(dcc.Markdown('''**Select callout option:**''')),
+                ],width=3),
+                dbc.Col([
+                    html.Label(dcc.Markdown('''**Click below for episode info:**''')),
+                ],width=3)
             ]),
             dbc.Row([
                 dbc.Col([
                     dcc.Dropdown(
                             id='dropdown3b',
+                            style={'color':'black'},
                             options=[{'label': i, 'value': i} for i in all_main_chars_list],
                             value=all_main_chars_list[0]
                     )
-                ],width=4),
+                ],width=3),
                 dbc.Col([
                     dcc.Dropdown(
                             id='dropdown3c',
+                            style={'color':'black'},
+
                             options=[{'label': i, 'value': i} for i in all_main_chars_list],
                             value=all_main_chars_list[1]
                     )
-                ],width=4),
+                ],width=3),
                 dbc.Col([
                      dbc.RadioItems(
                         id='radio1',
                         options=[
-                            {'label': 'Show Callouts', 'value': 'Show Callouts'},
-                            {'label': 'Hide Callouts', 'value': 'Hide Callouts'}
+                            {'label': ' Show Callouts', 'value': ' Show Callouts'},
+                            {'label': ' Hide Callouts', 'value': ' Hide Callouts'}
                         ],
-                        value='Show Callouts',
+                        value=' Show Callouts',
                         labelStyle={'display': 'inline-block','text-align': 'left'}
                     )
-                ],width=4)
+                ],width=3),
+                dbc.Col([
+                    dbc.Button("Episode Descriptions by Character",id='open0')
+                ],width=3)
             ]),
             dbc.Row([
                 dbc.Col([
@@ -599,95 +614,32 @@ app.layout = html.Div([
                 dbc.Col([
                     dcc.Graph(id='sentiment_line_graph'),
                 ],width=12),
-            ]),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Button(id='open2',block=True)
-                ],width=3),
-                dbc.Col([
-                    dbc.Button(id='open1',block=True)
-                ],width=3),
-                dbc.Col([
-                    dbc.Button(id='open4',block=True)
-                ],width=3),
-                dbc.Col([
-                    dbc.Button(id='open3',block=True)
-                ],width=3),
-            ],no_gutters=True),        
-#BUTTON #1 --> Character 1, Minimum Sentiment
+            ]),     
             html.Div([
                 dbc.Modal(
                     children=[
                         dbc.ModalHeader("Episode Description"),
                         dbc.ModalBody(
                             children=[
+                                html.P('Character 1 - Put Something here'),
                                 html.P(
-                                    id="table2",
+                                    id="table0",
+                                    style={'overflow':'auto','maxHeight':'400px'}
+                                ),
+                                html.P('Character 2 - Put Something here'),
+                                html.P(
+                                    id="table0_again",
                                     style={'overflow':'auto','maxHeight':'400px'}
                                 )
                             ]
                         ),
                         dbc.ModalFooter(
-                            dbc.Button("Close", id="close1", className="ml-auto")
+                            dbc.Button("Close", id="close0", className="ml-auto")
                         ),
-                    ],id="modal1"
+                    ],id="modal0", size="lg"
+
                 )
-            ]),
-            #BUTTON #2 --> Character 1, Maximum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id='table1',
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close2", className="ml-auto")
-                        ),
-                    ],id="modal2")
-            ]),
-            #BUTTON #3 --> Character 2, Minimum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id="table4",
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close3", className="ml-auto")
-                        ),
-                    ],id="modal3"
-                )
-            ]),
-            #BUTTON #4 --> Character 2, Maximum Sentiment
-            html.Div([
-                dbc.Modal(
-                    children=[
-                        dbc.ModalHeader("Episode Description"),
-                        dbc.ModalBody(
-                            children=[
-                                html.P(
-                                    id='table3',
-                                    style={'overflow':'auto','maxHeight':'400px'}
-                                )
-                            ]
-                        ),
-                        dbc.ModalFooter(
-                            dbc.Button("Close", id="close4", className="ml-auto")
-                        ),
-                    ],id="modal4")
-            ])                           
+            ])           
         ]),
         dcc.Tab(label='How is everyone connected?',value='tab-4',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -710,6 +662,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown4',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in season_choices],
                         value=season_choices[0]
                     ), width=3
@@ -717,6 +670,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown7',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in episode_choices],
                         value=episode_choices[0]
                     ), width=3
@@ -724,6 +678,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown5',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in character_choices],
                         value=character_choices[0]
                     ), width=3
@@ -731,6 +686,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown6',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in character_choices],
                         value=character_choices[1]
                     ), width=3
@@ -804,6 +760,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown8',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in tweet_seasons],
                         value=tweet_seasons[0]
                     ), width=6
@@ -811,6 +768,7 @@ app.layout = html.Div([
                 dbc.Col(
                     dcc.Dropdown(
                         id='dropdown9',
+                        style={'color':'black'},
                         options=[{'label': i, 'value': i} for i in tweet_episodes],
                         value=tweet_episodes[0]
                     ), width=6
@@ -1008,8 +966,8 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
     xlimit2 = top_words2['count'].max()
 
     if xlimit1 > xlimit2:
-        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1} Words',labels={'count':'Frequency'})
-        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2} Words',labels={'count':'Frequency'})
+        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1} Words',labels={'count':'Frequency'},template='plotly_dark')
+        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2} Words',labels={'count':'Frequency'},template='plotly_dark')
 
         bar_fig1.update_layout(
             coloraxis_showscale=False, 
@@ -1035,8 +993,8 @@ def update_word_chart(season_select,character_select1, character_select2,slider_
         bar_fig2.update_traces(marker_color='#D7504D')
 
     else:
-        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1} Words',labels={'count':'Frequency'})
-        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2} Words',labels={'count':'Frequency'})
+        bar_fig1 = px.bar(top_words1, x='count', y='word',orientation='h',title=f'{char1} Words',labels={'count':'Frequency'},template='plotly_dark')
+        bar_fig2 = px.bar(top_words2, x='count', y='word',orientation='h',title=f'{char2} Words',labels={'count':'Frequency'},template='plotly_dark')
 
         bar_fig1.update_layout(
             coloraxis_showscale=False, 
@@ -1124,15 +1082,17 @@ def speech_stats(season_select,character_select1,character_select2):
     words_shared_perc = round((num/denom)*100,1)
 
 
-    #dup/unique
+   #income_formatted = f"${filtered['Per Capita Income'].median():,.2f}"
 
 
     if TOTAL_WORDS1 > TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_words1} more words'),
+                html.H4(f'{char1}: {larger_words1:,.0f} more words'),
                 html.P(f'than {char2} during {season_select}')
             ])
+
+
         ],
         style={
             'width': '100%',
@@ -1145,7 +1105,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_WORDS1 < TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_words2} more words'),
+                html.H4(f'{char2}: {larger_words2:,.0f} more words'),
                 html.P(f'than {char1} during {season_select}')
             ])
         ],
@@ -1179,7 +1139,7 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_LINES1 > TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_lines1} more lines'),
+                html.H4(f'{char1}: {larger_lines1:,.0f} more lines'),
                 html.P(f'than {char2} during {season_select}')
 
             ])
@@ -1196,7 +1156,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_LINES1 < TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_lines2} more lines'),
+                html.H4(f'{char2}: {larger_lines2:,.0f} more lines'),
                 html.P(f'than {char1} during {season_select}')
             ])
        
@@ -1230,7 +1190,7 @@ def speech_stats(season_select,character_select1,character_select2):
 
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_scenes1} more scenes'),
+                html.H4(f'{char1}: {larger_scenes1:,.0f} more scenes'),
                 html.P(f'than {char2} during {season_select}')
 
             ])
@@ -1246,7 +1206,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_SCENES1 < TOTAL_SCENES2:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_scenes2} more scenes'),
+                html.H4(f'{char2}: {larger_scenes2:,.0f} more scenes'),
                 html.P(f'than {char1} during {season_select}')
             ])
         ],
@@ -1301,14 +1261,9 @@ def speech_stats(season_select,character_select1,character_select2):
     Output('card6','children'),
     Output('card7','children'),
     Output('card8','children'),
-    Output('table1','children'),
-    Output('table2','children'),
-    Output('table3','children'),
-    Output('table4','children'),
-    Output('open1','children'),
-    Output('open2','children'),
-    Output('open3','children'),
-    Output('open4','children'),
+    Output('table0','children'),
+    Output('table0_again','children'),
+
     Input('dropdown3b','value'),
     Input('dropdown3c','value'),
     Input('radio1','value')
@@ -1376,12 +1331,12 @@ def sentiment(character_select1, character_select2,radio_select):
         sentiment_df, x="label", y=[f"{character_select1} Sentiment",f"{character_select2} Sentiment"], title='Average Sentiment Over Time',
         labels={
             "label": "Episodes"
-        }, markers=True
+        }, markers=True,template='plotly_dark'
     )
     fig.update_xaxes(showticklabels=False,showspikes=True)
-    fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="black")
+    fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="white")
 
-    if "Show Callouts" in radio_select:
+    if " Show Callouts" in radio_select:
         fig.add_annotation(text=f"{character_select1} (Max)", x=char1_se_ep_max, y=char1_max, arrowhead=1, showarrow=True)
         fig.add_annotation(text=f"{character_select1} (Min)", x=char1_se_ep_min, y=char1_min, arrowhead=1, showarrow=True, ay=45)
         fig.add_annotation(text=f"{character_select2} (Max)", x=char2_se_ep_max, y=char2_max, arrowhead=1, showarrow=True)
@@ -1489,27 +1444,14 @@ def sentiment(character_select1, character_select2,radio_select):
     most_pos1 = most_pos1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
     most_neg1 = most_neg1.rename(columns={'label': 'Episode', 'title': 'Title','desc':'Description'})
 
-    most_pos1 = most_pos1[['Episode','Title','Description']]#.style.hide_index()
-    most_neg1 = most_neg1[['Episode','Title','Description']]#.style.hide_index()
+    most_pos1 = most_pos1[['Episode','Title','Description']]
+    most_neg1 = most_neg1[['Episode','Title','Description']]
 
-    pos_dt1 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_pos1.columns],
-        data=most_pos1.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
-    neg_dt1 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_neg1.columns],
-        data=most_neg1.to_dict('records'),
-        style_data={
-            'whiteSpace': 'normal',
-            'height': '150px',
-        },
-        style_cell={'textAlign': 'left'}
-    )
+    most_pos1['Character'] = character_select1
+    most_pos1['Sentiment'] = "Most Positive"
+
+    most_neg1['Character'] = character_select1
+    most_neg1['Sentiment'] = "Most Negative"
 
 
     s_df2=new_df2.groupby(['season','episode']).agg({
@@ -1529,47 +1471,46 @@ def sentiment(character_select1, character_select2,radio_select):
     most_pos2 = most_pos2[['Episode','Title','Description']]#.style.hide_index()
     most_neg2 = most_neg2[['Episode','Title','Description']]#.style.hide_index()
 
-    pos_dt2 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_pos2.columns],
-        data=most_pos2.to_dict('records'),
+
+    most_pos2['Character'] = character_select2
+    most_pos2['Sentiment'] = "Most Positive"
+
+    most_neg2['Character'] = character_select2
+    most_neg2['Sentiment'] = "Most Negative"
+
+    extreme_episodes1 = pd.concat([most_pos1, most_neg1])
+    extreme_episodes2 = pd.concat([most_pos2, most_neg2])
+
+
+
+    episode_descs_table1 = dt.DataTable(
+        columns=[{"name": i, "id": i} for i in extreme_episodes1.columns],
+        data=extreme_episodes1.to_dict('records'),
         style_data={
             'whiteSpace': 'normal',
             'height': '150px',
+            'color':'black',
+            'backgroundColor': 'white'
         },
         style_cell={'textAlign': 'left'}
     )
-    neg_dt2 = dt.DataTable(
-        columns=[{"name": i, "id": i} for i in most_neg2.columns],
-        data=most_neg2.to_dict('records'),
+
+
+    episode_descs_table2 = dt.DataTable(
+        columns=[{"name": i, "id": i} for i in extreme_episodes2.columns],
+        data=extreme_episodes2.to_dict('records'),
         style_data={
             'whiteSpace': 'normal',
             'height': '150px',
+            'color':'black',
+            'backgroundColor': 'white'
         },
         style_cell={'textAlign': 'left'}
     )
-
-    button1 = dbc.Button([
-        html.H5(f"{character_select1} Min Sentiment"),
-        html.P('Click Here for Episode Description')
-    ])
-
-    button2 = dbc.Button([
-        html.H5(f"{character_select1} Max Sentiment"),
-        html.P('Click Here for Episode Description')
-    ])
-
-    button3 = dbc.Button([
-        html.H5(f"{character_select2} Min Sentiment"),
-        html.P('Click Here for Episode Description')
-    ])
-
-    button4 = dbc.Button([
-        html.H5(f"{character_select2} Max Sentiment"),
-        html.P('Click Here for Episode Description')
-    ])
+    
 
 
-    return fig, card5, card6, card7, card8, pos_dt1, neg_dt1, pos_dt2, neg_dt2, button1, button2, button3, button4
+    return fig, card5, card6, card7, card8, episode_descs_table1, episode_descs_table2
 
 
 @app.callback(
@@ -1678,7 +1619,7 @@ def network(season_select, episode_select, character_select1, character_select2,
 
         fig_wordcloud = px.imshow(
             my_wordcloud1, 
-            template='ggplot2'
+            template='plotly_dark'
         )
         fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
         fig_wordcloud.update_xaxes(visible=False)
@@ -1695,8 +1636,8 @@ def network(season_select, episode_select, character_select1, character_select2,
         ).generate(' '.join(df2))
 
         fig_wordcloud = px.imshow(
-            my_wordcloud2, 
-            template='ggplot2'
+            my_wordcloud2,
+            template='plotly_dark'
         )
         fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
         fig_wordcloud.update_xaxes(visible=False)
@@ -1713,8 +1654,8 @@ def network(season_select, episode_select, character_select1, character_select2,
         ).generate(' '.join(df3))
 
         fig_wordcloud = px.imshow(
-            my_wordcloud3, 
-            template='ggplot2'
+            my_wordcloud3,
+            template='plotly_dark'
         )
         fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
         fig_wordcloud.update_xaxes(visible=False)
@@ -1749,6 +1690,7 @@ def network(season_select, episode_select, character_select1, character_select2,
     nodes = [{
         'id': node_name, 
         'label': node_name,
+        'font':'12px arial white',
         # 'group':new_df['Source'],
         # 'color':new_df['Source'],
         'shape':'dot',
@@ -1872,7 +1814,7 @@ def twitter_sentiment(season_select,episode_select):
         labels={
             "ep_num": "Episode",
             #"compound": "Sentiment"
-        }
+        },template='plotly_dark'
     )
     fig.update_layout(
         yaxis_title=None,
@@ -1902,7 +1844,7 @@ def twitter_sentiment(season_select,episode_select):
 
     ).generate(' '.join(dff))
 
-    fig_wordcloud = px.imshow(my_wordcloud, template='ggplot2',
+    fig_wordcloud = px.imshow(my_wordcloud,template='plotly_dark',
                               title="Word Cloud by Season and Episode")
     fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
     fig_wordcloud.update_xaxes(visible=False)
@@ -1963,6 +1905,19 @@ def toggle_modal4(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
+
+@app.callback(
+    Output("modal0", "is_open"),
+    [Input("open0", "n_clicks"), 
+    Input("close0", "n_clicks")],
+    [State("modal0", "is_open")],
+)
+
+def toggle_modal0(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
 
 app.run_server(host='0.0.0.0',port='8055')
 # if __name__=='__main__':
