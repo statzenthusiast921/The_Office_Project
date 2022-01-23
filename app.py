@@ -456,7 +456,7 @@ app.layout = html.Div([
         dcc.Tab(label='What is this project about?',value='tab-1',style=tab_style, selected_style=tab_selected_style,
             children=[
                 html.Div([
-                    html.H1(dcc.Markdown('''**Welcome to my Text Analysis of The Office!**''')),
+                    html.H1(dcc.Markdown('''**Welcome to my NLP Analysis of The Office!**''')),
                     html.Br()
                 ]), 
                 html.Div([
@@ -466,22 +466,22 @@ app.layout = html.Div([
                     html.P("This analysis attempts to uncover patterns in the speech of major characters of the show.  The following questions were addressed:"),
                     html.P('1.) How do speech patterns differ between characters and through seasons?'),
                     html.P('2.) Can sentiment analysis uncover trends and intensities in emotion throughout the show?'),
-                    html.P('3.) Can we understand how and why certain characters are connected in any episode?'),
-                    html.P('4.) Can we glean any insights from social media sites like Twitter or media database sites like IMDB?',),
+                    html.P('3.) Can we understand how certain characters are connected in any episode?'),
+                    html.P('4.) Can we glean any insights from online sources like Twitter or IMDB?',),
                     html.Br()
                 ],style={'color':'white'}),
                 html.Div([
                     html.P(dcc.Markdown('''**What data is being used for this analysis?**'''),style={'color':'white'}),
                 ],style={'text-decoration': 'underline','color':'white'}),
                 html.Div([
-                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#',style={'color':'#08bc8c'}), ' for the majority of the analysis.  Complementary data was scraped from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1',style={'color':'#08bc8c'}), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)',style={'color':'#08bc8c'}), " Twitter data was scraped using functions under the ",html.A("TWINT",href='https://pypi.org/project/twint/',style={'color':'#08bc8c'})," library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
+                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#',style={'color':'#08bc8c'}), ' for the majority of the analysis.  Complementary data was scraped from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1',style={'color':'#08bc8c'}), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)',style={'color':'#08bc8c'}), " Twitter data was scraped using functions under the ",html.A("TWINT",href='https://pypi.org/project/twint/',style={'color':'#08bc8c'})," library of Python.  The search criteria for the tweets included: tweets posted on the airdate through the following day, English language tweets, tweets marked with #theoffice, and a maximum number of 100 tweets per episode."]),
                     html.Br()
                 ],style={'color':'white'}),
                 html.Div([
                     html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
                 ],style={'text-decoration': 'underline','color':'white'}),
                 html.Div([
-                    html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping of data were utilized by searching for any tweet that contained '#theoffice'.  Extensive cleaning of relevant tweets and discarding of irrelevant tweets was needed to obtain an useful dataset. Finally, a goal was set of obtaining a maximum of 100 tweets per episode.  However, 100 tweets with the specified criteria were not always available.  Thus, there are an inconsistent number of tweets per episode."),
+                    html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of this data only focuses on Season 6 through 9.  The main criteria utilized to search for tweets was anything that included #theoffice, which did not result in an exhaustive list of tweets.  Because of this, an inconsistent number of tweets were scraped per episode and also many irrelevant tweets had to be discarded."),
                     html.P("2.) The analysis was constrained to only the core set of characters with a few exceptions and their conversations with each other."),
                     html.P(["3.) Sentiment analysis was conducted using the ", html.A("VADER",href='https://github.com/cjhutto/vaderSentiment',style={'color':'#08bc8c'}), " tool, which is a rule-based sentiment analyzer.  It uses a list of words which are labeled as positive or negative according to their semantic orientation to calculate the text sentiment.  This approach can be applied in many settings, but is best suited for social media data when context is not as important."])
 
@@ -1863,7 +1863,7 @@ def twitter_sentiment(season_select,episode_select):
     vert_line = int(episode_line['ep_num'])
 
     fig = px.line(
-        avg_sent_tweets, x="ep_num", y=["Twitter Sentiment","Scaled IMDB Rating"], title='Average Sentiment by Season',
+        avg_sent_tweets, x="ep_num", y=["Twitter Sentiment","Scaled IMDB Rating"], title='Average Sentiment/Rating by Season',
         labels={
             "ep_num": "Episode",
             #"compound": "Sentiment"
