@@ -1,21 +1,19 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/20/22
+#Date Last Modified: 01/22/22
 #-----------------------------------------------#
 
 #Import libraries
 #from dash_bootstrap_components._components.Card import Card
-from dash.development.base_component import _check_if_has_indexable_children
-from numpy.core.numeric import True_, full
+#from dash.development.base_component import _check_if_has_indexable_children
+#from numpy.core.numeric import True_, full
 import pandas as pd
 import numpy as np
 import dash
 import os
 import matplotlib.pyplot as plt
-#%matplotlib inline
 plt.style.use('ggplot')
 from dash import dcc
 from dash import html
-#from dash import dbc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.express as px
@@ -190,7 +188,7 @@ def removeStopWords_and_dumb_tweets(str):
   cachedStopWords.update(('rt','like','um','uh','oh',' s ','and','i','I','a','and','so','this','when','it','many','so','cant','yes','no',
   'these','office','theoffice','theofficenbc','deleted','scene','watching','watch','tonight','fucking','freakfest','freakfestfucking','downtowndetroit','getglue','terryperry','terrytperry',
   'fridays','privatevip','freakygirls','badd','biotches','want','episode','season','show','last night','night','make','felonydaprince','joegunner','peek','pictures','sneak','exclusive','first'
-  'promo','watched','nbcstore','officetally','clip','last','cheaturself','treaturself','nite','ladiesfreetil','parishouston','krayjuice','tinkabhottie','msebonnieb','theofficialfelz'
+  'promo','watched','nbcstore','officetally','clip','last','cheaturself','treaturself','nite','ladiesfreetil','parishouston','krayjuice','tinkabhottie','msebonnieb','theofficialfelz','assistiu'
 
   ))
 #remove stop words
@@ -200,21 +198,21 @@ def removeStopWords_and_dumb_tweets(str):
 
 #Clean up script
 #0.) Convert column to string type
-office_data['line_text'] = office_data['line_text'].astype('str')
+office_data.loc[:,'line_text'] = office_data['line_text'].astype('str')
 #1.) Convert to lowercase
 office_data['cleaned_text'] = office_data['line_text'].str.lower()
 #2.) Remove brackets
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_brackets_contents)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = remove_brackets_contents)
 #3.) Remove special characters
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_special_characters)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = remove_special_characters)
 #4.) Remove digits
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = remove_digits)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = remove_digits)
 #5.) Remove punctuation
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = punct)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = punct)
 #6.) Lemmatize words
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = lemmatize)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = lemmatize)
 #7.) Remove stop words
-office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = removeStopWords)
+office_data.loc[:,'cleaned_text'] = office_data['cleaned_text'].apply(func = removeStopWords)
 
 
 
@@ -224,22 +222,22 @@ office_data['cleaned_text'] = office_data['cleaned_text'].apply(func = removeSto
 #0.) Convert everything to string
 tweet_data['cleaned_tweet'] = tweet_data['tweet'].astype(str)
 #1.) Lowercase
-tweet_data['cleaned_tweet'] = tweet_data['tweet'].str.lower()
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].str.lower()
 #2.) Remove hastags and mentions
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].str.replace(r'@[A-Za-z0-9_]+', '')
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].str.replace(r'#[A-Za-z0-9_]+', '')
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].str.replace(r'@[A-Za-z0-9_]+', '',regex=True)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].str.replace(r'#[A-Za-z0-9_]+', '',regex=True)
 #3.) Remove links
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].replace(r'http\S+', '', regex=True).replace(r'www\S+', '', regex=True)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].replace(r'http\S+', '', regex=True).replace(r'www\S+', '', regex=True)
 #4.) Remove punctuation
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = punct)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = punct)
 #5.) Remove non alpha-numeric characters
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = remove_special_characters)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = remove_special_characters)
 #6.) Remove digits
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = remove_digits)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = remove_digits)
 #7.) Lemmatize words
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = lemmatize)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = lemmatize)
 #8.) Remove stop words and dumb tweets
-tweet_data['cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = removeStopWords_and_dumb_tweets)
+tweet_data.loc[:,'cleaned_tweet'] = tweet_data['cleaned_tweet'].apply(func = removeStopWords_and_dumb_tweets)
 #9.) Remove certain users
 tweet_data = tweet_data[tweet_data['user_id_str']!=75195164]
 #10.) Remove explicit tweets
@@ -250,12 +248,13 @@ tweet_data = tweet_data.drop_duplicates(subset=['cleaned_tweet'],keep='first')
 
 #Clean the tweets - word cloud
 #0.) Convert everything to string
+
 tweet_data['cleaned_tweet_sentiment'] = tweet_data['tweet'].astype(str)
 #1.) Remove hastags and mentions
-tweet_data['cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].str.replace(r'@[A-Za-z0-9_]+', '')
-tweet_data['cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].str.replace(r'#[A-Za-z0-9_]+', '')
+tweet_data.loc[:,'cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].str.replace(r'@[A-Za-z0-9_]+', '',regex=True)
+tweet_data.loc[:,'cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].str.replace(r'#[A-Za-z0-9_]+', '',regex=True)
 #2.) Remove links
-tweet_data['cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].replace(r'http\S+', '', regex=True).replace(r'www\S+', '', regex=True)
+tweet_data.loc[:,'cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].replace(r'http\S+', '', regex=True).replace(r'www\S+', '', regex=True)
 #3.) Remove certain users
 tweet_data = tweet_data[tweet_data['user_id_str']!=75195164]
 #4.) Remove explicit tweets
@@ -427,7 +426,6 @@ for season in the_mains_df['season'].unique().tolist():
 #season_episode_character_dictionary['Season 1']
 #season_episode_character_dictionary['Season 1']['Episode 2']
 
-
 tabs_styles = {
     'height': '44px'
 }
@@ -435,6 +433,7 @@ tab_style = {
     'borderBottom': '1px solid #d6d6d6',
     'padding': '6px',
     'fontWeight': 'bold',
+    'color':'white',
     'backgroundColor': '#222222'
 
 }
@@ -462,47 +461,47 @@ app.layout = html.Div([
                 ]), 
                 html.Div([
                     html.P(dcc.Markdown('''**What is the purpose of this dashboard?**''')),
-                ],style={'text-decoration': 'underline'}),
+                ],style={'text-decoration': 'underline','color':'white'}),
                 html.Div([
                     html.P("This analysis attempts to uncover patterns in the speech of major characters of the show.  The following questions were addressed:"),
                     html.P('1.) How do speech patterns differ between characters and through seasons?'),
                     html.P('2.) Can sentiment analysis uncover trends and intensities in emotion throughout the show?'),
                     html.P('3.) Can we understand how and why certain characters are connected in any episode?'),
-                    html.P('4.) Can we glean any insights from social media sites like Twitter or media database IMDB?'),
+                    html.P('4.) Can we glean any insights from social media sites like Twitter or media database sites like IMDB?',),
                     html.Br()
-                ]),
+                ],style={'color':'white'}),
                 html.Div([
-                    html.P(dcc.Markdown('''**What data is being used for this analysis?**''')),
-                ],style={'text-decoration': 'underline'}),
+                    html.P(dcc.Markdown('''**What data is being used for this analysis?**'''),style={'color':'white'}),
+                ],style={'text-decoration': 'underline','color':'white'}),
                 html.Div([
-                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#'), ' for the majority of the analysis.  Complementary data was obtained from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1'), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)'), " Twitter data was scraped using functions under the ",html.A("TWINT",href='https://pypi.org/project/twint/')," library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
+                    html.P(['The complete transcript of every episode from all 9 seasons of The Office were used from this link ', html.A('here',href='https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#',style={'color':'#08bc8c'}), ' for the majority of the analysis.  Complementary data was scraped from the ', html.A('Internet Movie Database',href='https://www.imdb.com/title/tt0386676/episodes?season=1',style={'color':'#08bc8c'}), ' coupled with data from ', html.A('Wikipedia.',href='https://en.wikipedia.org/wiki/The_Office_(American_season_1)',style={'color':'#08bc8c'}), " Twitter data was scraped using functions under the ",html.A("TWINT",href='https://pypi.org/project/twint/',style={'color':'#08bc8c'})," library of Python.  The tweets were scraped for each episode from Season 6-9 from the airdate through the following date."]),
                     html.Br()
-                ]),
+                ],style={'color':'white'}),
                 html.Div([
                     html.P(dcc.Markdown('''**What are the limitations of this data?**''')),
-                ],style={'text-decoration': 'underline'}),
+                ],style={'text-decoration': 'underline','color':'white'}),
                 html.Div([
-                    html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping of data were utilized by searching for any tweet that contained '#theoffice'.  Extensive cleaning of relevant tweets and discarding of irrelevant tweets was needed to obtain an useful dataset."),
+                    html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of Twitter data only focuses on Season 6 through 9.  Additionally, the functions under the TWINT library that performed the scraping of data were utilized by searching for any tweet that contained '#theoffice'.  Extensive cleaning of relevant tweets and discarding of irrelevant tweets was needed to obtain an useful dataset. Finally, a goal was set of obtaining a maximum of 100 tweets per episode.  However, 100 tweets with the specified criteria were not always available.  Thus, there are an inconsistent number of tweets per episode."),
                     html.P("2.) The analysis was constrained to only the core set of characters with a few exceptions and their conversations with each other."),
-                    html.P(["3.) Sentiment analysis was conducted using the ", html.A("VADER",href='https://github.com/cjhutto/vaderSentiment'), " tool, which is a rule-based sentiment analyzer.  It uses a list of words which are labeled as positive or negative according to their semantic orientation to calculate the text sentiment.  This approach can be applied in many settings, but is best suited for social media data when context is not as important."])
+                    html.P(["3.) Sentiment analysis was conducted using the ", html.A("VADER",href='https://github.com/cjhutto/vaderSentiment',style={'color':'#08bc8c'}), " tool, which is a rule-based sentiment analyzer.  It uses a list of words which are labeled as positive or negative according to their semantic orientation to calculate the text sentiment.  This approach can be applied in many settings, but is best suited for social media data when context is not as important."])
 
-                ])
+                ],style={'color':'white'})
             ]
         ),
         dcc.Tab(label='How does their speech differ?',value='tab-2',style=tab_style, selected_style=tab_selected_style,
         children=[
                 dbc.Row([
                     dbc.Col([
-                        html.Label(dcc.Markdown('''**Choose season:**''')),                        
+                        html.Label(dcc.Markdown('''**Choose season:**'''),style={'color':'white'}),                        
                     ],width=3),
                     dbc.Col([
-                        html.Label(dcc.Markdown('''**Choose character #1:**'''))
+                        html.Label(dcc.Markdown('''**Choose character #1:**'''),style={'color':'white'})
                     ],width=3),
                     dbc.Col([
-                        html.Label(dcc.Markdown('''**Choose character #2:**'''))
+                        html.Label(dcc.Markdown('''**Choose character #2:**'''),style={'color':'white'})
                     ],width=3),
                     dbc.Col([
-                        html.Label(dcc.Markdown('''**Choose # of words:**''')),
+                        html.Label(dcc.Markdown('''**Choose # of words:**'''),style={'color':'white'}),
                     ],width=3)
                 ]),
                 dbc.Row([
@@ -572,16 +571,16 @@ app.layout = html.Div([
         children=[
             dbc.Row([
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose character #1:**'''))
+                    html.Label(dcc.Markdown('''**Choose character #1:**'''),style={'color':'white'})
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose character #2:**''')),
+                    html.Label(dcc.Markdown('''**Choose character #2:**'''),style={'color':'white'}),
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Select callout option:**''')),
+                    html.Label(dcc.Markdown('''**Select callout option:**'''),style={'color':'white'}),
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Click below for episode info:**''')),
+                    html.Label(dcc.Markdown('''**Click below for episode info:**'''),style={'color':'white'}),
                 ],width=3)
             ]),
             dbc.Row([
@@ -621,9 +620,6 @@ app.layout = html.Div([
                 dbc.Col([
                     dbc.Card(id='card5')
                 ],width=4),
-                # dbc.Col([
-                #     dbc.Card(id='card6')
-                # ],width=3),
                 dbc.Col([
                     dbc.Card(id='card7')
                 ],width=4),
@@ -666,16 +662,16 @@ app.layout = html.Div([
         children=[
             dbc.Row([
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose season:**'''))
+                    html.Label(dcc.Markdown('''**Choose season:**'''),style={'color':'white'})
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose episode:**'''))
+                    html.Label(dcc.Markdown('''**Choose episode:**'''),style={'color':'white'})
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose character #1:**'''))
+                    html.Label(dcc.Markdown('''**Choose character #1:**'''),style={'color':'white'})
                 ],width=3),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose character #2:**'''))
+                    html.Label(dcc.Markdown('''**Choose character #2:**'''),style={'color':'white'})
                 ],width=3),
 
             ]),
@@ -718,9 +714,6 @@ app.layout = html.Div([
                 dbc.Col([
                     dbc.Card(id='card9')
                 ],width=4),
-                # dbc.Col([
-                #     dbc.Card(id='card10')
-                # ],width=4),
                 dbc.Col([
                     dbc.Card(id='card11')
                 ],width=4),
@@ -730,51 +723,63 @@ app.layout = html.Div([
             ],no_gutters=True),
             dbc.Row([
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Who was in their network?**'''),style={'text-align':'center'}),
-                    visdcc.Network(
-                        id='net',
-                        options = dict(
-                            height='600px', 
-                            width='100%',
-                            physics={'barnesHut': {'avoidOverlap': 0.5}},
-                            maxVelocity=0,
-                            stabilization={
-                                'enabled': 'true',
-                                'iterations': 15,
-                                'updateInterval': 50,
-                                'onlyDynamicEdges': 'false',
-                                'fit': 'true'
-                            },
-                            scaling='value'
-                        )
-                    )
-                ],width=6),
-                dbc.Col([
-                    html.Label(dcc.Markdown('''**Which topics connect these characters?**''')),
+                    #Choose between network graph vs. topic modeling results
                     dbc.RadioItems(
-                        id='radio2',
+                        id='radio_toggle',
                         options=[
-                            {'label': 'Show Most Frequently Discussed Topic', 'value': 'Show Most Frequently Discussed Topic'},
-                            {'label': 'Show 2nd Most Frequently Discussed Topic', 'value': 'Show 2nd Most Frequently Discussed Topic'},
-                            {'label': 'Show 3rd Most Frequently Discussed Topic','value': 'Show 3rd Most Frequently Discussed Topic'},
+                            {'label': 'Question 1: Who was in their network?', 'value': 'Question 1: Who was in their network?'},
+                            {'label': 'Question 2: What topics connect these characters?', 'value': 'Question 2: What topics connect these characters?'},
 
                         ],
-                        value='Show Most Frequently Discussed Topic',
+                        value='Question 1: Who was in their network?',
                         labelStyle={'display': 'inline-block','text-align': 'left'}
                     ),
-                    dcc.Graph(id='episode_topic', figure={}, config={'displayModeBar': True}),
-
-                ],width=6)
+                    html.Br(),
+                    #Network Graph
+                    html.Div([
+                        visdcc.Network(
+                            id='net',
+                            options = dict(
+                                height='600px', 
+                                width='100%',
+                                physics={'barnesHut': {'avoidOverlap': 0.5}},
+                                maxVelocity=0,
+                                stabilization={
+                                    'enabled': 'true',
+                                    'iterations': 15,
+                                    'updateInterval': 50,
+                                    'onlyDynamicEdges': 'false',
+                                    'fit': 'true'
+                                },
+                                scaling='value'
+                            )
+                        )
+                    ],id='net_div'),
+                ],width=12),
+                #Topic Modeling Results
+                dbc.Col([
+                    html.Label(dcc.Markdown('''#1 Most Frequently Discussed Topic'''),id='topic_label1',style={'color':'white'}),                        
+                    dcc.Graph(id='episode_topic1', figure={}, config={'displayModeBar': True}) 
+                ],width=4),
+                dbc.Col([
+                    html.Label(dcc.Markdown('''2nd Most Frequently Discussed Topic'''),id='topic_label2',style={'color':'white'}),                        
+                    dcc.Graph(id='episode_topic2', figure={}, config={'displayModeBar': True}) 
+                ],width=4),
+                dbc.Col([
+                    html.Label(dcc.Markdown('''3rd Most Frequently Discussed Topic'''),id='topic_label3',style={'color':'white'}),                        
+                    dcc.Graph(id='episode_topic3', figure={}, config={'displayModeBar': True}) 
+                ],width=4),
+              
             ],no_gutters=True)
         ]),
-        dcc.Tab(label='What does Twitter think?',value='tab-5',style=tab_style, selected_style=tab_selected_style,
+        dcc.Tab(label='What does Twitter/IMDB think?',value='tab-5',style=tab_style, selected_style=tab_selected_style,
         children=[
             dbc.Row([
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose season:**'''))
+                    html.Label(dcc.Markdown('''**Choose season:**'''),style={'color':'white'})
                 ],width=6),
                 dbc.Col([
-                    html.Label(dcc.Markdown('''**Choose episode:**'''))
+                    html.Label(dcc.Markdown('''**Choose episode:**'''),style={'color':'white'})
                 ],width=6),
             ]),
             dbc.Row([
@@ -794,6 +799,17 @@ app.layout = html.Div([
                         value=tweet_episodes[0]
                     ), width=6
                 )
+            ]),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card(id='card13')
+                ], width=4),
+                dbc.Col([
+                    dbc.Card(id='card14')
+                ], width=4),
+                dbc.Col([
+                    dbc.Card(id='card15')
+                ], width=4)
             ]),
             dbc.Row([
                 dbc.Col(
@@ -1109,7 +1125,7 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_WORDS1 > TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_words1:,.0f} more words'),
+                html.H5(f'{char1}: {larger_words1:,.0f} more words'),
                 html.P(f'than {char2} during {season_select}')
             ])
 
@@ -1126,7 +1142,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_WORDS1 < TOTAL_WORDS2:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_words2:,.0f} more words'),
+                html.H5(f'{char2}: {larger_words2:,.0f} more words'),
                 html.P(f'than {char1} during {season_select}')
             ])
         ],
@@ -1141,7 +1157,7 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card1 = dbc.Card([
             dbc.CardBody([
-                html.H4('Same # of words spoken'),
+                html.H5('Same # of words spoken'),
                 html.P(f'during {season_select}')
 
             ])
@@ -1160,7 +1176,7 @@ def speech_stats(season_select,character_select1,character_select2):
     if TOTAL_LINES1 > TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_lines1:,.0f} more lines'),
+                html.H5(f'{char1}: {larger_lines1:,.0f} more lines'),
                 html.P(f'than {char2} during {season_select}')
 
             ])
@@ -1177,7 +1193,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_LINES1 < TOTAL_LINES2:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_lines2:,.0f} more lines'),
+                html.H5(f'{char2}: {larger_lines2:,.0f} more lines'),
                 html.P(f'than {char1} during {season_select}')
             ])
        
@@ -1193,7 +1209,7 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card2 = dbc.Card([
             dbc.CardBody([
-                html.H4('Same # of lines spoken'),
+                html.H5('Same # of lines spoken'),
                 html.P(f'during {season_select}')
 
             ])
@@ -1211,7 +1227,7 @@ def speech_stats(season_select,character_select1,character_select2):
 
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char1}: {larger_scenes1:,.0f} more scenes'),
+                html.H5(f'{char1}: {larger_scenes1:,.0f} more scenes'),
                 html.P(f'than {char2} during {season_select}')
 
             ])
@@ -1227,7 +1243,7 @@ def speech_stats(season_select,character_select1,character_select2):
     elif TOTAL_SCENES1 < TOTAL_SCENES2:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{char2}: {larger_scenes2:,.0f} more scenes'),
+                html.H5(f'{char2}: {larger_scenes2:,.0f} more scenes'),
                 html.P(f'than {char1} during {season_select}')
             ])
         ],
@@ -1242,7 +1258,7 @@ def speech_stats(season_select,character_select1,character_select2):
     else:
         card3 = dbc.Card([
             dbc.CardBody([
-                html.H4('Same # of scenes'),
+                html.H5('Same # of scenes'),
                 html.P(f'during {season_select}')
             ])
         ],
@@ -1258,7 +1274,7 @@ def speech_stats(season_select,character_select1,character_select2):
 
     card4 = dbc.Card([
         dbc.CardBody([
-                html.H4(f'{words_shared_perc}% words shared'),
+                html.H5(f'{words_shared_perc}% words shared'),
                 html.P(f'between {char1} and {char2} during {season_select}')
 
             ])
@@ -1279,7 +1295,6 @@ def speech_stats(season_select,character_select1,character_select2):
 @app.callback(
     Output('sentiment_line_graph','figure'),
     Output('card5','children'),
-    #Output('card6','children'),
     Output('card7','children'),
     Output('card8','children'),
     Output('table0','children'),
@@ -1354,7 +1369,12 @@ def sentiment(character_select1, character_select2,radio_select):
         sentiment_df, x="label", y=[f"{character_select1} Sentiment",f"{character_select2} Sentiment"], title='Average Sentiment Over Time',
         labels={
             "label": "Episodes"
-        }, markers=True,template='plotly_dark'
+        }, markers=True,
+        template='plotly_dark',
+        color_discrete_map={
+                 f"{character_select1} Sentiment": "#2E91E5",
+                 f"{character_select2} Sentiment": "#D7504D"
+             }
     )
     fig.update_xaxes(showticklabels=False,showspikes=True)
     fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="white")
@@ -1390,7 +1410,7 @@ def sentiment(character_select1, character_select2,radio_select):
     )
     card5 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{character_select1}: {perc_pos_days1}% positive days'),
+                html.H5(f'{character_select1}: {perc_pos_days1}% positive episodes'),
                 html.P('Sentiment Score > 0')
             ])
         ],
@@ -1402,25 +1422,10 @@ def sentiment(character_select1, character_select2,radio_select):
             'fontWeight': 'bold',
             'fontSize':12},
         outline=True)
-    # card6 = dbc.Card([
-    #         dbc.CardBody([
-    #             html.H4(f'{character_select1}: {perc_extreme_days1}% extreme days'),
-    #             html.P('Sentiment Score >= 0.5 or <= -0.5')
-
-    #         ])
-    #     ],
-    #     style={
-    #         'width': '100%',
-    #         'text-align': 'center',
-    #         'background-color': '#2E91E5',
-    #         'color':'white',
-    #         'fontWeight': 'bold',
-    #         'fontSize':12},
-    #     outline=True)
 
     card7 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{character_select2}: {perc_pos_days2}% positive days'),
+                html.H5(f'{character_select2}: {perc_pos_days2}% positive episodes'),
                 html.P('Sentiment Score > 0')
 
             ])
@@ -1436,7 +1441,7 @@ def sentiment(character_select1, character_select2,radio_select):
 
     card8 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{similar_score}% of days with similar scores'),
+                html.H5(f'{similar_score}% episodes with similar scores'),
                 html.P(f'Scores within 0.05 of each other')
 
             ])
@@ -1449,8 +1454,6 @@ def sentiment(character_select1, character_select2,radio_select):
             'fontWeight': 'bold',
             'fontSize':12},
         outline=True)
-    #fig.update_traces(line_color='#2E91E5')
-    #fig.update_traces(marker_color='#D7504D')
 
 
     s_df1=new_df1.groupby(['season','episode']).agg({
@@ -1535,26 +1538,27 @@ def sentiment(character_select1, character_select2,radio_select):
 
 @app.callback(
     Output('net','data'),
-    Output('episode_topic','figure'),
+    Output('episode_topic1','figure'),
+    Output('episode_topic2','figure'),
+    Output('episode_topic3','figure'),
+
     Output('card9','children'),
-    #Output('card10','children'),
     Output('card11','children'),
     Output('card12','children'),
+
     Input('dropdown4','value'),
     Input('dropdown7','value'),
     Input('dropdown5','value'),
-    Input('dropdown6','value'),
-    Input('radio2','value')
+    Input('dropdown6','value')
 )
 
-def network(season_select, episode_select, character_select1, character_select2, radio_select):
+def network(season_select, episode_select, character_select1, character_select2):
     
     
     filtered = data_for_ng[['season','episode','scene','speaker']]
     filtered = filtered[(filtered['season']==season_select) & (filtered['episode']==episode_select)]
 
     #Person with most scenes stat
-    #test = filtered[(filtered['season']=="Season 5") & (filtered['episode']=="Episode 3")]
     test = filtered[['scene','speaker']]
     test['ui'] = test['scene'] + '_'+ test['speaker']
     remove_rows = pd.DataFrame(test['ui'].drop_duplicates(keep='first'))
@@ -1627,65 +1631,61 @@ def network(season_select, episode_select, character_select1, character_select2,
 
     #Assign % of scenes discussing Topic #1
 
-
-
     wc_df1 = df3[df3['topic_label']==top_topics[0]]
     wc_df2 = df3[df3['topic_label']==top_topics[1]]
     wc_df3 = df3[df3['topic_label']==top_topics[2]]
 
-    if "Show Most Frequently Discussed Topic" in radio_select:
 
-        df1= wc_df1.copy()
-        df1 = df1.cleaned_text
+    df1= wc_df1.copy()
+    df1 = df1.cleaned_text
 
-        my_wordcloud1 = WordCloud(
+    my_wordcloud1 = WordCloud(
             background_color='black',
             min_word_length = 4
-        ).generate(' '.join(df1))
+    ).generate(' '.join(df1))
 
-        fig_wordcloud = px.imshow(
+    fig_wordcloud1 = px.imshow(
             my_wordcloud1, 
             template='plotly_dark'
-        )
-        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        fig_wordcloud.update_xaxes(visible=False)
-        fig_wordcloud.update_yaxes(visible=False)
+    )
+    fig_wordcloud1.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+    fig_wordcloud1.update_xaxes(visible=False)
+    fig_wordcloud1.update_yaxes(visible=False)
 
-    if "Show 2nd Most Frequently Discussed Topic" in radio_select:
 
-        df2= wc_df2.copy()
-        df2 = df2.cleaned_text
+    df2= wc_df2.copy()
+    df2 = df2.cleaned_text
 
-        my_wordcloud2 = WordCloud(
+    my_wordcloud2 = WordCloud(
             background_color='black',
             min_word_length = 4
-        ).generate(' '.join(df2))
+    ).generate(' '.join(df2))
 
-        fig_wordcloud = px.imshow(
+    fig_wordcloud2 = px.imshow(
             my_wordcloud2,
             template='plotly_dark'
-        )
-        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        fig_wordcloud.update_xaxes(visible=False)
-        fig_wordcloud.update_yaxes(visible=False)
+    )
+    fig_wordcloud2.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+    fig_wordcloud2.update_xaxes(visible=False)
+    fig_wordcloud2.update_yaxes(visible=False)
 
-    if "Show 3rd Most Frequently Discussed Topic" in radio_select:
 
-        df3= wc_df3.copy()
-        df3 = df3['cleaned_text']
+    df3= wc_df3.copy()
+    df3 = df3['cleaned_text']
 
-        my_wordcloud3 = WordCloud(
+    my_wordcloud3 = WordCloud(
             background_color='black',
             min_word_length = 4
-        ).generate(' '.join(df3))
+    ).generate(' '.join(df3))
 
-        fig_wordcloud = px.imshow(
+    fig_wordcloud3 = px.imshow(
             my_wordcloud3,
             template='plotly_dark'
-        )
-        fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        fig_wordcloud.update_xaxes(visible=False)
-        fig_wordcloud.update_yaxes(visible=False)
+
+    )
+    fig_wordcloud3.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+    fig_wordcloud3.update_xaxes(visible=False)
+    fig_wordcloud3.update_yaxes(visible=False)
 
 
     def assets_pairs(speakers):
@@ -1758,8 +1758,8 @@ def network(season_select, episode_select, character_select1, character_select2,
 
     card9 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{person_most_scenes} ({person_num_scenes})'),
-                html.P('Most scenes in this episode.')
+                html.H5(f'Most scenes total: {person_most_scenes}'),
+                html.P(f'{person_num_scenes} scenes in this episode')
             ])
         ],
         style={
@@ -1770,26 +1770,11 @@ def network(season_select, episode_select, character_select1, character_select2,
             'fontWeight': 'bold',
             'fontSize':12},
         outline=True)
-    # card10 = dbc.Card([
-    #         dbc.CardBody([
-    #             html.H4('X person'),
-    #             html.P('Some metric for this episode.')
-
-    #         ])
-    #     ],
-    #     style={
-    #         'width': '100%',
-    #         'text-align': 'center',
-    #         'background-color': 'grey',
-    #         'color':'white',
-    #         'fontWeight': 'bold',
-    #         'fontSize':12},
-    #     outline=True)
 
     card11 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{paired1_most_scenes} ({paried1_num_scenes})'),
-                html.P(f'Most scenes with {character_select1}')
+                html.H5(f'Most scenes with {character_select1}: {paired1_most_scenes}'),
+                html.P(f'{paried1_num_scenes} scenes in this episode')
 
             ])
         ],
@@ -1804,8 +1789,8 @@ def network(season_select, episode_select, character_select1, character_select2,
 
     card12 = dbc.Card([
             dbc.CardBody([
-                html.H4(f'{paired2_most_scenes} ({paried2_num_scenes})'),
-                html.P(f'Most scenes with {character_select2}')
+                html.H5(f'Most scenes with {character_select2}: {paired2_most_scenes}'),
+                html.P(f'{paried2_num_scenes} scenes in this episode')
 
             ])
         ],
@@ -1822,12 +1807,35 @@ def network(season_select, episode_select, character_select1, character_select2,
 
 
 
-    return data, fig_wordcloud, card9, card11, card12#, card10
+    return data, fig_wordcloud1, fig_wordcloud2, fig_wordcloud3, card9, card11, card12#, card10
+
+
+@app.callback(
+    Output('episode_topic1','style'),
+    Output('episode_topic2','style'),
+    Output('episode_topic3','style'),
+    Output('topic_label1','style'),
+    Output('topic_label2','style'),
+    Output('topic_label3','style'),
+
+    Output('net_div','style'),
+    Input('radio_toggle','value')
+)
+
+def toggle_graphs(radio_toggle):
+    if radio_toggle == "Question 1: Who was in their network?":
+        return {'display':'none'}, {'display':'none'}, {'display':'none'}, {'display':'none'}, {'display':'none'}, {'display':'none'}, {'display':'block'}
+    else:
+        return {'display':'block'},{'display':'block'},{'display':'block'},{'display':'block'},{'display':'block'},{'display':'block'},{'display':'none'}
+       
 
 #Twitter Sentiment Over Time
 @app.callback(
     Output('twitter_sentiment_over_time','figure'),
     Output('word_cloud_chart','figure'),
+    Output('card13','children'),
+    Output('card14','children'),
+    Output('card15','children'),
     Input('dropdown8','value'),
     Input('dropdown9','value')
 )
@@ -1850,16 +1858,30 @@ def twitter_sentiment(season_select,episode_select):
 
     avg_sent_tweets = avg_sent_tweets.sort_values(by='ep_num',ascending=True)
 
+    episode_line = avg_sent_tweets[avg_sent_tweets['Episode']==episode_select]
+    #episode_line = avg_sent_tweets[avg_sent_tweets['Episode']=="Episode 3"]
+    vert_line = int(episode_line['ep_num'])
+
     fig = px.line(
         avg_sent_tweets, x="ep_num", y=["Twitter Sentiment","Scaled IMDB Rating"], title='Average Sentiment by Season',
         labels={
             "ep_num": "Episode",
             #"compound": "Sentiment"
-        },template='plotly_dark', markers=True
+        },template='plotly_dark', 
+        markers=True,
+        color_discrete_map={
+            "Twitter Sentiment": "#2E91E5",
+            "Scaled IMDB Rating": "#D7504D"
+        }
     )
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True,range = [-1,1])
     fig.add_hline(y=0,line_width=3, line_dash="dash", line_color="white")
+    fig.add_vline(x=vert_line,line_dash="dash", line_color="white")
+    if vert_line<20:
+        fig.add_annotation(text="Selected Episode", x=vert_line, y=-0.5, arrowhead=1, showarrow=True, ax=60)
+    else:
+        fig.add_annotation(text="Selected Episode", x=vert_line, y=-0.5, arrowhead=1, showarrow=True, ax=-60)
 
     fig.update_layout(
         yaxis_title=None,
@@ -1872,17 +1894,6 @@ def twitter_sentiment(season_select,episode_select):
             x=1
         )
     )
-
-
-        # fig_wordcloud = px.imshow(
-        #     my_wordcloud3,
-        #     template='plotly_dark'
-        # )
-        # fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        # fig_wordcloud.update_xaxes(visible=False)
-        # fig_wordcloud.update_yaxes(visible=False)
-
-    #Make a dataframe and check out Season 6, Episode 3 --> wedding
 
     dff = wc_df.copy()
     dff = dff['cleaned_tweet']
@@ -1897,14 +1908,82 @@ def twitter_sentiment(season_select,episode_select):
     fig_wordcloud = px.imshow(
         my_wordcloud,
         template='plotly_dark',
-        title="Word Cloud by Season and Episode"
+        title=f"Words Tweeted during {season_select}, {episode_select}"
     )
     fig_wordcloud.update_layout(margin=dict(l=0, r=0, t=30, b=0))
     fig_wordcloud.update_xaxes(visible=False)
     fig_wordcloud.update_yaxes(visible=False)
 
+    by_imdb = avg_sent_tweets.sort_values(by='Scaled IMDB Rating',ascending=False).reset_index()
+    by_twitter = avg_sent_tweets.sort_values(by='Twitter Sentiment',ascending=False).reset_index()
 
-    return fig, fig_wordcloud
+    max_twitter = by_twitter['Twitter Sentiment'].max()
+    max_imdb = by_imdb['Scaled IMDB Rating'].max()
+
+    imdb_max_ep = by_imdb[by_imdb['Scaled IMDB Rating']==max_imdb]['Episode'].values[0]
+    twitter_max_ep = by_twitter[by_twitter['Twitter Sentiment']==max_twitter]['Episode'].values[0]
+
+
+    by_twitter['diff'] = abs(by_twitter['Twitter Sentiment'] - by_twitter['Scaled IMDB Rating'])
+    similar_scores = by_twitter[by_twitter['diff']<=0.05]
+    ss = similar_scores.shape[0]
+
+    dissimilar_scores = by_twitter[by_twitter['diff']>=0.5]
+    dss = dissimilar_scores.shape[0]
+
+    avg_diff = round(by_twitter['diff'].mean(),2)
+
+
+    card13 = dbc.Card([
+                dbc.CardBody([
+                    html.H5(f'# Episodes with Similar Scores: {ss}'),
+                    html.P('Scores within 0.05 of each other')
+
+                ])
+            ],
+            style={
+                'width': '100%',
+                'text-align': 'center',
+                'background-color': 'grey',
+                'color':'white',
+                'fontWeight': 'bold',
+                'fontSize':12},
+            outline=True)
+    card14 = dbc.Card([
+            dbc.CardBody([
+                html.H5(f'# Episodes with Very Different Scores: {dss}'),
+                html.P('Scores with difference of at least 0.5')
+
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'grey',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+
+    card15 = dbc.Card([
+            dbc.CardBody([
+                html.H5(f'Average Score Difference: {avg_diff}'),
+                html.P(f'between metrics for {season_select}')
+
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': 'grey',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+
+    return fig, fig_wordcloud, card13, card14, card15
 
 
 
