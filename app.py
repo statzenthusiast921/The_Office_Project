@@ -1,5 +1,5 @@
 #Date Created: 08/13/21
-#Date Last Modified: 01/22/22
+#Date Last Modified: 01/25/22
 #-----------------------------------------------#
 
 #Import libraries
@@ -86,11 +86,8 @@ imdb_data['season'] = 'Season ' + imdb_data['season'].astype(str)
 imdb_data['episode'] = 'Episode ' + imdb_data['episode'].astype(str)
 imdb_data.head()
 
-imdb_tojoin_tweets = imdb_data[['season','episode','rating']]
-#imdb_tojoin_tweets['season'] = imdb_tojoin_tweets['season'].str.rstrip('.0')
+imdb_tojoin_tweets = imdb_data[['season','episode','rating','total_votes']]
 imdb_tojoin_tweets.loc[:,"season"] = imdb_tojoin_tweets['season'].str.rstrip('.0')
-
-#imdb_tojoin_tweets['episode'] = imdb_tojoin_tweets['episode'].str.rstrip('.0')
 imdb_tojoin_tweets.loc[:,"episode"] = imdb_tojoin_tweets['episode'].str.rstrip('.0')
 
 
@@ -244,11 +241,9 @@ tweet_data = tweet_data[tweet_data['user_id_str']!=75195164]
 tweet_data = tweet_data[~tweet_data["cleaned_tweet"].str.contains("sex",case=False)]
 #11.) Remove duplicate tweets
 tweet_data = tweet_data.drop_duplicates(subset=['cleaned_tweet'],keep='first') 
-#tweet_data.to_csv(r'/Users/jonzimmerman/Desktop/tweet_test.csv')
 
 #Clean the tweets - word cloud
 #0.) Convert everything to string
-
 tweet_data['cleaned_tweet_sentiment'] = tweet_data['tweet'].astype(str)
 #1.) Remove hastags and mentions
 tweet_data.loc[:,'cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentiment'].str.replace(r'@[A-Za-z0-9_]+', '',regex=True)
@@ -259,9 +254,6 @@ tweet_data.loc[:,'cleaned_tweet_sentiment'] = tweet_data['cleaned_tweet_sentimen
 tweet_data = tweet_data[tweet_data['user_id_str']!=75195164]
 #4.) Remove explicit tweets
 tweet_data = tweet_data[~tweet_data["cleaned_tweet_sentiment"].str.contains("sex|rt|theofficenbc|theoffice|fucking|freakfest|freakfestfucking|downtowndetroit|getglue|terryperry|terrytperry|fridays|privatevip|freakygirls|badd|biotches|felonydaprince|joegunner|peek|pictures|sneak|exclusive|promo|nbcstore|officetally|cheaturself|treaturself|ladiesfreetil|parishouston|krayjuice|tinkabhottie|msebonnieb|theofficialfelz",case=False, regex=True)]
-#tweet_data.to_csv(r'/Users/jonzimmerman/Desktop/tweet_test.csv')
-
-
 
 #Test out metrics
 
@@ -483,7 +475,7 @@ app.layout = html.Div([
                 html.Div([
                     html.P("1.) Twitter data was not extensively available until Season 6, so the analysis of this data only focuses on Season 6 through 9.  The main criteria utilized to search for tweets was anything that included #theoffice, which did not result in an exhaustive list of tweets.  Because of this, an inconsistent number of tweets were scraped per episode and also many irrelevant tweets had to be discarded."),
                     html.P("2.) The analysis was constrained to only the core set of characters with a few exceptions and their conversations with each other."),
-                    html.P(["3.) Sentiment analysis was conducted using the ", html.A("VADER",href='https://github.com/cjhutto/vaderSentiment',style={'color':'#08bc8c'}), " tool, which is a rule-based sentiment analyzer.  It uses a list of words which are labeled as positive or negative according to their semantic orientation to calculate the text sentiment.  This approach can be applied in many settings, but is best suited for social media data when context is not as important."])
+                    html.P(["3.) Sentiment analysis was conducted using the ", html.A("VADER",href='https://github.com/cjhutto/vaderSentiment',style={'color':'#08bc8c'}), " tool, which is a rule-based sentiment analyzer.  It uses a list of words which are labeled as positive or negative according to their semantic orientation to calculate the text sentiment.  This approach can be applied in many settings, but is best suited for social media data when context is not as important.  Also, performance can fluctuate with slight variations in wording and punctuation."])
 
                 ],style={'color':'white'})
             ]
@@ -563,6 +555,31 @@ app.layout = html.Div([
                     dbc.Col([
                         dcc.Graph(id='word_freq_graph2')
                     ],width=6)
+                ]),
+                dbc.Row([
+                    dbc.Button("Click Here for More Info",id='info1')
+                ]),
+                html.Div([
+                    dbc.Modal(
+                        children=[
+                            dbc.ModalHeader("Dashboard Information Page #1"),
+                            dbc.ModalBody(
+                                children=[
+                                    html.P('On this page, you will find 4 parameters to modify the charts:'),
+                                    html.P('1.) Season'),
+                                    html.P('2.) Character #1'),
+                                    html.P('3.) Character #2'),
+                                    html.P('4.) # of words in a sequence'),
+                                    html.P('To compare the dialogue of your preferred characters, you can select any of the 4 parameters to update the two charts.'),
+                                    html.P("The dialogue has been scrubbed of most stop-words, which include words such as 'I', 'you', 'and', and so on.")
+                                ]
+                            ),
+                            dbc.ModalFooter( 
+                                dbc.Button("Close", id="close_info1", className="ml-auto")
+                            ),
+                        ],id="modal_info1", size="md"
+
+                    )
                 ])
 
 
@@ -631,7 +648,11 @@ app.layout = html.Div([
                 dbc.Col([
                     dcc.Graph(id='sentiment_line_graph'),
                 ],width=12),
-            ]),     
+            ]),  
+            dbc.Row([
+                dbc.Button("Click Here for More Info",id='info2')
+            ]),   
+            #Button for Episode Description
             html.Div([
                 dbc.Modal(
                     children=[
@@ -656,7 +677,28 @@ app.layout = html.Div([
                     ],id="modal0", size="xl"
 
                 )
-            ])           
+            ]),
+            #More Info Button
+            html.Div([
+                    dbc.Modal(
+                        children=[
+                            dbc.ModalHeader("Dashboard Information Page #2"),
+                            dbc.ModalBody(
+                                children=[
+                                    html.P('On this page, you will find 2 required parameters and 1 optional parameter to modify the chart:'),
+                                    html.P('1.) Character #1'),
+                                    html.P('2.) Character #2'),
+                                    html.P('3.) Show or hide callouts'),
+                                    html.P('The chart shows the VADER-calculated sentiment scores over time for any two major characters in the show.  The scores were calculated by averaging the VADER score for every line of a character up to an episode level.')
+                                ]
+                            ),
+                            dbc.ModalFooter( 
+                                dbc.Button("Close", id="close_info2", className="ml-auto")
+                            ),
+                        ],id="modal_info2", size="md"
+
+                    )
+                ])           
         ]),
         dcc.Tab(label='How is everyone connected?',value='tab-4',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -770,7 +812,34 @@ app.layout = html.Div([
                     dcc.Graph(id='episode_topic3', figure={}, config={'displayModeBar': True}) 
                 ],width=4),
               
-            ],no_gutters=True)
+            ],no_gutters=True),
+            dbc.Row([
+                dbc.Button("Click Here for More Info",id='info3')
+            ]),
+            #More Info Button
+            html.Div([
+                    dbc.Modal(
+                        children=[
+                            dbc.ModalHeader("Dashboard Information Page #3"),
+                            dbc.ModalBody(
+                                children=[
+                                    html.P('On this page, you will find 4 parameters to modify the charts:'),
+                                    html.P('1.) Season'),
+                                    html.P('2.) Episode'),
+                                    html.P('3.) Character #1'),
+                                    html.P('4.) Character #2'),
+                                    html.P('There are two main charts available to view in this dashboard:'),
+                                    html.P('1.) Network graph showcasing which auxillary characters had scenes with the two selected characters for any particular episode.'),
+                                    html.P('2.) Word clouds showcasing the results of topic modelling analyses performed using the Non-Negative Matrix Factorization (NMF) technique.  The results showcase the words used in the major topics of discussion between the selected characters.')
+                                ]
+                            ),
+                            dbc.ModalFooter( 
+                                dbc.Button("Close", id="close_info3", className="ml-auto")
+                            ),
+                        ],id="modal_info3", size="md"
+
+                    )
+                ])          
         ]),
         dcc.Tab(label='What does Twitter/IMDB think?',value='tab-5',style=tab_style, selected_style=tab_selected_style,
         children=[
@@ -820,7 +889,32 @@ app.layout = html.Div([
                     dcc.Graph(id='word_cloud_chart', figure={}, config={'displayModeBar': False}),
                     width=6
                 )
-            ])
+            ]),
+            dbc.Row([
+                dbc.Button("Click Here for More Info",id='info4')
+            ]),
+            #More Info Button
+            html.Div([
+                    dbc.Modal(
+                        children=[
+                            dbc.ModalHeader("Dashboard Information Page #4"),
+                            dbc.ModalBody(
+                                children=[
+                                    html.P('On this page, you will find 2 parameters to modify the charts:'),
+                                    html.P('1.) Season'),
+                                    html.P('2.) Episode'),
+                                    html.P('The chart on the left plots the average VADER sentiment score of tweets posted on the airdate of an episode through the following date.  Coupled with the sentiment scores, is a scaled rating from the Internet Movie Database (IMDB) for the corresponding episodes.  The ratings were originally numbers between 0 and 10, but were rescaled to fall between -1 and +1 to match the scale of the sentiment scores.'),
+                                    html.P('The chart on the right is a wordcloud of the most frequently used words in tweets for each selected episode in a season.')
+                                ]
+                            ),
+                            dbc.ModalFooter( 
+                                dbc.Button("Close", id="close_info4", className="ml-auto")
+                            ),
+                        ],id="modal_info4", size="md"
+
+                    )
+                ])          
+   
         ])
     ])
 ])
@@ -852,31 +946,6 @@ def render_content(tab):
             html.H3('Tab content 4')
         ])
 
-# @app.callback(
-#     Output('first-dropdown', 'children'),
-#     Input('dropdown0', 'value') #----- Select the season
-# )
-# def set_character_options(selected_season):
-#     return dcc.Dropdown(
-#         id='dropdown1',
-#         options=[{'label': i, 'value': i} for i in season_character_dict[selected_season]],
-#         value=season_character_dict[selected_season][0]
-#         )
-
-
-# @app.callback(
-#     Output('second-dropdown','children'),
-#     Input('dropdown1','value'),
-# )
-# def update_second_dropdown(value):
-#     updated_choose_character = all_main_chars_list.copy()
-#     updated_choose_character.remove(value)
-#     return dcc.Dropdown(
-#         id='dropdown2',
-#         options=[{'label': i, 'value': i} for i in updated_choose_character]
-#     )
-
-
 
 @app.callback(
     Output('dropdown1', 'options'),#-----Filters the character options
@@ -893,18 +962,6 @@ def set_character_options(selected_season):
 )
 def set_character_options2(selected_season):
     return [{'label': i, 'value': i} for i in season_character_dict[selected_season]], season_character_dict[selected_season][1]
-
-
-
-# @app.callback(
-#     Output('dropdown2','options'),
-#     Input('dropdown1','value')
-# )
-# def update_second_dropdown_again(value):
-#     updated_choose_character = all_main_chars_list.copy()
-#     updated_choose_character.remove(value)
-#     return [{'label': i, 'value': i} for i in updated_choose_character]
-
 
 
 
@@ -1842,13 +1899,19 @@ def toggle_graphs(radio_toggle):
 
 def twitter_sentiment(season_select,episode_select):
     new_df = tweet_data[(tweet_data['season']==season_select)]
-
     wc_df = tweet_data[(tweet_data['season']==season_select) & (tweet_data['episode']==episode_select)]
 
     sid = SentimentIntensityAnalyzer()
     new_df['scores'] = new_df['cleaned_tweet_sentiment'].apply(lambda cleaned_tweet_sentiment: sid.polarity_scores(cleaned_tweet_sentiment))
     new_df['compound']  = new_df['scores'].apply(lambda score_dict: score_dict['compound'])
-    new_df['comp_score'] = new_df['compound'].apply(lambda c: 'pos' if c >=0 else 'neg')
+    new_df['comp_class'] = new_df['compound'].apply(lambda c: 1 if c >=0 else 0)
+
+    #Highest % of Positive Tweets - Twitter Metric
+    perc_pos_tweets = pd.DataFrame(new_df.groupby('episode')['comp_class'].mean()).reset_index()
+    perc_pos_tweets.loc[:,'comp_class'] = round(perc_pos_tweets['comp_class']*100,1)
+    max_pos = perc_pos_tweets['comp_class'].max()
+    episode_max_perc = perc_pos_tweets[perc_pos_tweets['comp_class']==max_pos]['episode'].values[0]
+
 
     avg_sent_tweets = new_df.groupby('episode')[['compound','scaled_rating']].mean()
     avg_sent_tweets = pd.DataFrame(avg_sent_tweets).reset_index()
@@ -1858,9 +1921,14 @@ def twitter_sentiment(season_select,episode_select):
 
     avg_sent_tweets = avg_sent_tweets.sort_values(by='ep_num',ascending=True)
 
+    #Vertical Line for Selected Episode
     episode_line = avg_sent_tweets[avg_sent_tweets['Episode']==episode_select]
-    #episode_line = avg_sent_tweets[avg_sent_tweets['Episode']=="Episode 3"]
     vert_line = int(episode_line['ep_num'])
+
+    #Max Votes for an Episode Per Season - IMDB Metric
+    max_votes = new_df['total_votes'].max()
+    episode_max_votes = new_df[new_df['total_votes']==max_votes]['episode'].values[0]
+    # imdb_max_ep = by_imdb[by_imdb['Scaled IMDB Rating']==max_imdb]['Episode'].values[0]
 
     fig = px.line(
         avg_sent_tweets, x="ep_num", y=["Twitter Sentiment","Scaled IMDB Rating"], title='Average Sentiment/Rating by Season',
@@ -1914,30 +1982,49 @@ def twitter_sentiment(season_select,episode_select):
     fig_wordcloud.update_xaxes(visible=False)
     fig_wordcloud.update_yaxes(visible=False)
 
-    by_imdb = avg_sent_tweets.sort_values(by='Scaled IMDB Rating',ascending=False).reset_index()
     by_twitter = avg_sent_tweets.sort_values(by='Twitter Sentiment',ascending=False).reset_index()
-
-    max_twitter = by_twitter['Twitter Sentiment'].max()
-    max_imdb = by_imdb['Scaled IMDB Rating'].max()
-
-    imdb_max_ep = by_imdb[by_imdb['Scaled IMDB Rating']==max_imdb]['Episode'].values[0]
-    twitter_max_ep = by_twitter[by_twitter['Twitter Sentiment']==max_twitter]['Episode'].values[0]
-
-
     by_twitter['diff'] = abs(by_twitter['Twitter Sentiment'] - by_twitter['Scaled IMDB Rating'])
     similar_scores = by_twitter[by_twitter['diff']<=0.05]
     ss = similar_scores.shape[0]
 
-    dissimilar_scores = by_twitter[by_twitter['diff']>=0.5]
-    dss = dissimilar_scores.shape[0]
-
-    avg_diff = round(by_twitter['diff'].mean(),2)
-
 
     card13 = dbc.Card([
+            dbc.CardBody([
+                html.H5(f'{episode_max_perc} ({max_pos}%)'),
+                html.P(f'Highest % of Positive Tweets during {season_select}')
+
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#2391E5',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+    card14 = dbc.Card([
+            dbc.CardBody([
+                html.H5(f'{episode_max_votes} ({max_votes:,.0f})'),
+                html.P(f'Most IMDB Votes during {season_select}')
+
+            ])
+        ],
+        style={
+            'width': '100%',
+            'text-align': 'center',
+            'background-color': '#D7504D',
+            'color':'white',
+            'fontWeight': 'bold',
+            'fontSize':12},
+        outline=True)
+
+
+    card15 = dbc.Card([
                 dbc.CardBody([
                     html.H5(f'# Episodes with Similar Scores: {ss}'),
-                    html.P('Scores within 0.05 of each other')
+                    html.P(f'Scores within 0.05 of each other during {season_select}')
 
                 ])
             ],
@@ -1949,43 +2036,8 @@ def twitter_sentiment(season_select,episode_select):
                 'fontWeight': 'bold',
                 'fontSize':12},
             outline=True)
-    card14 = dbc.Card([
-            dbc.CardBody([
-                html.H5(f'# Episodes with Very Different Scores: {dss}'),
-                html.P('Scores with difference of at least 0.5')
-
-            ])
-        ],
-        style={
-            'width': '100%',
-            'text-align': 'center',
-            'background-color': 'grey',
-            'color':'white',
-            'fontWeight': 'bold',
-            'fontSize':12},
-        outline=True)
-
-
-    card15 = dbc.Card([
-            dbc.CardBody([
-                html.H5(f'Average Score Difference: {avg_diff}'),
-                html.P(f'between metrics for {season_select}')
-
-            ])
-        ],
-        style={
-            'width': '100%',
-            'text-align': 'center',
-            'background-color': 'grey',
-            'color':'white',
-            'fontWeight': 'bold',
-            'fontSize':12},
-        outline=True)
-
 
     return fig, fig_wordcloud, card13, card14, card15
-
-
 
 
 @app.callback(
@@ -2049,6 +2101,57 @@ def toggle_modal0(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
+
+@app.callback(
+    Output("modal_info1", "is_open"),
+    [Input("info1", "n_clicks"), 
+    Input("close_info1", "n_clicks")],
+    [State("modal_info1", "is_open")],
+)
+
+def toggle_modal_info1(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("modal_info2", "is_open"),
+    [Input("info2", "n_clicks"), 
+    Input("close_info2", "n_clicks")],
+    [State("modal_info2", "is_open")],
+)
+
+def toggle_modal_info2(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+
+@app.callback(
+    Output("modal_info3", "is_open"),
+    [Input("info3", "n_clicks"), 
+    Input("close_info3", "n_clicks")],
+    [State("modal_info3", "is_open")],
+)
+
+def toggle_modal_info3(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("modal_info4", "is_open"),
+    [Input("info4", "n_clicks"), 
+    Input("close_info4", "n_clicks")],
+    [State("modal_info4", "is_open")],
+)
+
+def toggle_modal_info4(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+
 
 
 app.run_server(host='0.0.0.0',port='8055')
