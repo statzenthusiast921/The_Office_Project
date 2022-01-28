@@ -45,9 +45,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 #Load data
 #/Users/jonathan.zimmerman/Desktop/Office NLP/the-office-lines.xlsx
-office_data = pd.read_excel("/Users/jonzimmerman/Desktop/Data Projects/The Office NLP/the-office-lines.xlsx")
+office_data = pd.read_excel("https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/the-office-lines.xlsx")
 imdb_data = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/office_episodes.csv')
-wiki_desc = pd.read_csv('/Users/jonzimmerman/Desktop/Data Projects/The Office NLP/wiki_desc.csv')
+wiki_desc = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/wiki_desc.csv')
 
 #Import Twitter data
 import pandas as pd
@@ -547,7 +547,7 @@ app.layout = html.Div([
                     dbc.Col([
                         dbc.Card(id="card4")
                     ],width=3)
-                ],no_gutters=True),
+                ],className="g-0"),
                 dbc.Row([
                     dbc.Col([
                         dcc.Graph(id='word_freq_graph1')
@@ -557,7 +557,7 @@ app.layout = html.Div([
                     ],width=6)
                 ]),
                 dbc.Row([
-                    dbc.Button("Click Here for More Info",id='info1')
+                    dbc.Button("Click Here for More Info",id='info1')#,color='Secondary',className='me-1')
                 ]),
                 html.Div([
                     dbc.Modal(
@@ -575,7 +575,7 @@ app.layout = html.Div([
                                 ]
                             ),
                             dbc.ModalFooter( 
-                                dbc.Button("Close", id="close_info1", className="ml-auto")
+                                dbc.Button("Close", id="close_info1")#,color='Secondary',className='me-1')
                             ),
                         ],id="modal_info1", size="md"
 
@@ -630,7 +630,7 @@ app.layout = html.Div([
                     )
                 ],width=3),
                 dbc.Col([
-                    dbc.Button("Episode Descriptions by Character",id='open0')
+                    dbc.Button("Episode Descriptions by Character",id='open0')#,color='Secondary',className='me-1')
                 ],width=3)
             ]),
             dbc.Row([
@@ -643,14 +643,14 @@ app.layout = html.Div([
                 dbc.Col([
                     dbc.Card(id='card8')
                 ],width=4),
-            ],no_gutters=True),   
+            ],className="g-0"),   
             dbc.Row([     
                 dbc.Col([
                     dcc.Graph(id='sentiment_line_graph'),
                 ],width=12),
             ]),  
             dbc.Row([
-                dbc.Button("Click Here for More Info",id='info2')
+                dbc.Button("Click Here for More Info",id='info2')#,color='Secondary',className='me-1')
             ]),   
             #Button for Episode Description
             html.Div([
@@ -672,7 +672,7 @@ app.layout = html.Div([
                             ]
                         ),
                         dbc.ModalFooter(
-                            dbc.Button("Close", id="close0", className="ml-auto")
+                            dbc.Button("Close", id="close0")#,color='Secondary',className='me-1')
                         ),
                     ],id="modal0", size="xl"
 
@@ -693,7 +693,7 @@ app.layout = html.Div([
                                 ]
                             ),
                             dbc.ModalFooter( 
-                                dbc.Button("Close", id="close_info2", className="ml-auto")
+                                dbc.Button("Close", id="close_info2")#,color='Secondary',className='me-1')
                             ),
                         ],id="modal_info2", size="md"
 
@@ -762,7 +762,7 @@ app.layout = html.Div([
                 dbc.Col([
                     dbc.Card(id='card12')
                 ],width=4),
-            ],no_gutters=True),
+            ],className="g-0"),
             dbc.Row([
                 dbc.Col([
                     #Choose between network graph vs. topic modeling results
@@ -812,9 +812,9 @@ app.layout = html.Div([
                     dcc.Graph(id='episode_topic3', figure={}, config={'displayModeBar': True}) 
                 ],width=4),
               
-            ],no_gutters=True),
+            ],className="g-0"),
             dbc.Row([
-                dbc.Button("Click Here for More Info",id='info3')
+                dbc.Button("Click Here for More Info",id='info3')#,color='Secondary',className='me-1')
             ]),
             #More Info Button
             html.Div([
@@ -834,7 +834,7 @@ app.layout = html.Div([
                                 ]
                             ),
                             dbc.ModalFooter( 
-                                dbc.Button("Close", id="close_info3", className="ml-auto")
+                                dbc.Button("Close", id="close_info3")#,color='Secondary',className='me-1')
                             ),
                         ],id="modal_info3", size="md"
 
@@ -891,7 +891,7 @@ app.layout = html.Div([
                 )
             ]),
             dbc.Row([
-                dbc.Button("Click Here for More Info",id='info4')
+                dbc.Button("Click Here for More Info",id='info4')#,color='Secondary',className='me-1')
             ]),
             #More Info Button
             html.Div([
@@ -908,7 +908,7 @@ app.layout = html.Div([
                                 ]
                             ),
                             dbc.ModalFooter( 
-                                dbc.Button("Close", id="close_info4", className="ml-auto")
+                                dbc.Button("Close", id="close_info4")#,color='Secondary',className='me-1')
                             ),
                         ],id="modal_info4", size="md"
 
@@ -2154,6 +2154,6 @@ def toggle_modal_info4(n1, n2, is_open):
 
 
 
-app.run_server(host='0.0.0.0',port='8055')
-# if __name__=='__main__':
-# 	app.run_server()
+# app.run_server(host='0.0.0.0',port='8055')
+if __name__=='__main__':
+	app.run_server()
