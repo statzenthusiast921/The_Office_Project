@@ -9,11 +9,7 @@ The goal of this project was to understand how language differs and compares bet
 *Can we glean any insights from online sources like Twitter or IMDB?
 
 ## Data
-*[Complete Transcript from The Office](https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#)
-
-Scraped data from each season's pages:
-
-*[Episode Descriptions - IMDB](https://www.imdb.com/title/tt0386676/episodes?season=1)
-
-*[Episode Descriptions - Wiki](https://en.wikipedia.org/wiki/The_Office_(American_season_1))
+* [Complete Transcript from The Office](https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#)
+* [Episode Descriptions - IMDB](https://www.imdb.com/title/tt0386676/episodes?season=1)
+* [Episode Descriptions - Wiki](https://en.wikipedia.org/wiki/The_Office_(American_season_1))
 
