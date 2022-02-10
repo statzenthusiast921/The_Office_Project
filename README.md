@@ -14,5 +14,6 @@ The goal of this project was to understand how language differs and compares bet
 Scraped data from each season's pages:
 
 *[Episode Descriptions - IMDB](https://www.imdb.com/title/tt0386676/episodes?season=1)
+
 *[Episode Descriptions - Wiki](https://en.wikipedia.org/wiki/The_Office_(American_season_1))
 
