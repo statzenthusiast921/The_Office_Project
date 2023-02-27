@@ -8,9 +8,9 @@ The goal of this project was to understand how language differs and compares bet
 * Can we understand how certain characters are connected in any episode?
 * Can we glean any insights from online sources like Twitter or IMDB?
 
-## Link
+## Application
 
-Click [here](https://the-office-nlp-app-jz.fly.dev/) to see the app!
+If you want to see the app, reach out to the email address I have provided in my bio.  I will need to scale up the instance on fly.io.
 
 ## Data
 * [Complete Transcript from The Office](https://www.kaggle.com/nasirkhalid24/the-office-us-complete-dialoguetranscript/version/1#)
