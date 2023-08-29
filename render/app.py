@@ -46,7 +46,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 #Load data
 #/Users/jonathan.zimmerman/Desktop/Office NLP/the-office-lines.xlsx
-office_data = pd.read_excel("https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/the-office-lines.xlsx")
+office_data = pd.read_csv("https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/the-office-lines.csv")
 imdb_data = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/office_episodes.csv')
 wiki_desc = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/wiki_desc.csv')
 
