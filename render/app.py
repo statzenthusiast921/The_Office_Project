@@ -49,15 +49,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 office_data = pd.read_csv("https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/the-office-lines.csv")
 
 
-imdb_data = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/office_episodes.csv')
-wiki_desc = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/wiki_desc.csv')
+imdb_data = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/office_episodes.csv')
+wiki_desc = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/wiki_desc.csv')
 
 #Import Twitter data
 import pandas as pd
-s6_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/season6_tweets.csv')
-s7_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/season7_tweets.csv')
-s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/season8_tweets.csv',lineterminator='\n')
-s9_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/data/season9_tweets.csv')
+s6_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season6_tweets.csv')
+s7_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season7_tweets.csv')
+s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season8_tweets.csv',lineterminator='\n')
+s9_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season9_tweets.csv')
 
 
 s6_tweets['episode'] = s6_tweets['episode ']
