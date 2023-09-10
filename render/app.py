@@ -56,7 +56,7 @@ wiki_desc = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/Th
 import pandas as pd
 s6_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season6_tweets.csv')
 s7_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season7_tweets.csv')
-s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season8_tweets.csv',lineterminator='\n')
+s8_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season8_tweets.csv')#,lineterminator='\n')
 s9_tweets = pd.read_csv('https://raw.githubusercontent.com/statzenthusiast921/The_Office_Project/main/data/season9_tweets.csv')
 
 
@@ -75,7 +75,9 @@ tweet_data = pd.concat(tweets)
 tweet_data['season'] = 'Season ' + tweet_data['season'].astype(str)
 tweet_data['episode'] = 'Episode ' + tweet_data['episode'].astype(str)
 
-tweet_seasons = tweet_data['season'].unique()
+#tweet_seasons = tweet_data['season'].unique()
+tweet_seasons = ['Season 6','Season 7', 'Season 8', 'Season 9']
+
 tweet_episodes = tweet_data['episode'].unique()
 
 
